@@ -1,0 +1,274 @@
+{% extends 'index.html' %}
+
+
+{% block title %}
+    Студмістечко
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="row no-margin-bottom">
+
+        <div class="col s3 grey lighten-4">
+            <div class="row no-margin-bottom">
+                <div class="col s12">
+                    <form method="GET">
+                        <div class="row">
+                            <div class="col s6">
+                                <p class="center">
+                                    <a class="waves-effect waves-light btn red accent-1" href="{% url 'main' %}">Очистити</a>
+                                </p>
+                            </div>
+                            <div class="col s6">
+                                <p>
+                                    <button class="green btn waves-effect waves-light" type="submit">
+                                        Застосувати
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class=""><b>Сортування:</b></p>
+                        <div class="row no-margin-bottom">
+                            <div class="col s6">
+                                <label>
+                                    <input class="with-gap" name="ordering" value="0" type="radio" {% if request.GET.ordering == '0' or request.GET.ordering is None %}checked{% endif %}/>
+                                    <span>гуртожиток</span>
+                                </label>
+                            </div>
+                            <div class="col s6">
+                                <label>
+                                    <input class="with-gap" name="ordering" value="1" type="radio" {% if request.GET.ordering == '1'%}checked{% endif %}/>
+                                    <span>паспортист</span>
+                                </label>
+                            </div>
+                            <div class="col s6">
+                                <label>
+                                    <input class="with-gap" name="ordering" value="2" type="radio" {% if request.GET.ordering == '2'%}checked{% endif %}/>
+                                    <span>дата реєстр</span>
+                                </label>
+                            </div>
+                            <div class="col s6">
+                                <label>
+                                    <input class="with-gap" name="ordering" value="3" type="radio" {% if request.GET.ordering == '3'%}checked{% endif %}/>
+                                    <span>дата зняття</span>
+                                </label>
+                            </div>
+                        </div>
+
+
+                        <hr>
+
+                        <p><b>Пошук:</b></p>
+                        <div class="row no-margin-bottom">
+                            <div class="col s6">
+                                <label>Книга</label>
+                                <select class="browser-default" name="book">
+                                    <option value="-1" selected>всі</option>
+                                    {% for bn in book_numbers %}
+                                        <option {% if request.GET.book == bn.id|slugify %}selected{% endif %} value="{{ bn.id }}">{{ bn }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col s6">
+                                <label>Гуртожиток</label>
+                                <select class="browser-default" name="hostel">
+                                    <option value="-1" selected>всі</option>
+                                    {% for hostel in hostels %}
+                                        <option {% if request.GET.hostel == hostel.id|slugify %}selected{% endif %} value="{{ hostel.id }}">{{ hostel }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row no-margin-bottom">
+                            <div class="input-field col s12">
+                                <input id="surname" type="text" name="surname" value="{{ request.GET.surname }}">
+                                <label for="surname">Прізвище</label>
+                            </div>
+                        </div>
+
+
+                        <div class="row no-margin-bottom">
+                            <div class="col s12">
+                                <p>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="birth_check" value="1" {% if request.GET.birth_check == '1'%}checked{% endif %}/>
+                                        <span>Дата народження</span>
+                                    </label>
+                                </p>
+                            </div>
+                            <div class="col s6 input-field ">
+                                <input type="date" id="birthday_start" name="birthday_start"
+                                       value="{% if request.GET.birthday_start %}{{ request.GET.birthday_start }}{% else %}1900-01-01{% endif %}"
+                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                <label for="birthday_start">Від</label>
+                            </div>
+                            <div class="col s6 input-field ">
+                                <input type="date" id="birthday_end" name="birthday_end"
+                                       value="{% if request.GET.birthday_end %}{{ request.GET.birthday_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                <label for="birthday_end">До</label>
+                            </div>
+                        </div>
+                        <div class="row no-margin-bottom">
+                            <div class="col s12">
+
+                                <label>
+                                    <input type="checkbox" name="reg_check" value="1" class="filled-in" {% if request.GET.reg_check == '1'%}checked{% endif %}/>
+                                    <span>Дата прибуття</span>
+                                </label>
+
+                            </div>
+                            <div class="col s6 input-field">
+                                <input type="date" id="reg_start" name="reg_start"
+                                       value="{% if request.GET.reg_start %}{{ request.GET.reg_start }}{% else %}1900-01-01{% endif %}"
+                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                <label for="reg_start">Від</label>
+                            </div>
+                            <div class="col s6 input-field ">
+                                <input type="date" id="reg_end" name="reg_end"
+                                       value="{% if request.GET.reg_end %}{{ request.GET.reg_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                <label for="reg_end">До</label>
+                            </div>
+                        </div>
+                        <div class="row no-margin-bottom">
+                            <div class="col s12">
+                                <p>
+                                    <label>
+                                        <input type="checkbox" name="de_reg_check" value="1" class="filled-in" {% if request.GET.de_reg_check == '1'%}checked{% endif %}/>
+                                        <span>Дата виписки</span>
+                                    </label>
+                                </p>
+                            </div>
+                            <div class="col s6 input-field ">
+                                <input type="date" id="de_reg_start" name="de_reg_start"
+                                       value="{% if request.GET.de_reg_start %}{{ request.GET.de_reg_start }}{% else %}1900-01-01{% endif %}"
+                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                <label for="de_reg_start">Від</label>
+                            </div>
+                            <div class="col s6 input-field ">
+                                <input type="date" id="de_reg_end" name="de_reg_end"
+                                       value="{% if request.GET.de_reg_end %}{{ request.GET.de_reg_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                <label for="de_reg_end">До</label>
+                            </div>
+                        </div>
+                        <div class="row no-margin-bottom">
+                            <div class="col s12">
+                                <p>
+                                    <label>
+                                        <input type="checkbox" name="age_one_check" value="1" class="filled-in" {% if request.GET.age_one_check == '1'%}checked{% endif %}/>
+                                        <span>Років (на дату)</span>
+                                    </label>
+                                </p>
+                            </div>
+                            <div class="col s6 input-field ">
+                                <input id="age" value="{% if request.GET.age %}{{ request.GET.age }}{% else %}18{% endif %}" name="age" type="number" min="1" step="1" max="120">
+                                <label for="age">Вік</label>
+                            </div>
+                            <div class="col s6 input-field ">
+                                <input type="date" id="age_on" name="age_on"
+                                       value="{% if request.GET.age_on %}{{ request.GET.age_on }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                <label for="age_on">На</label>
+                            </div>
+                        </div>
+
+                        <div class="row no-margin-bottom">
+                            <div class="col s4">
+                                <label>
+                                    <input class="with-gap" name="registered" value="-1" type="radio" {% if request.GET.registered == '-1' or request.GET.registered is None %}checked{% endif %}/>
+                                    <span>всі</span>
+                                </label>
+                            </div>
+                            <div class="col s4">
+                                <label>
+                                    <input class="with-gap" name="registered" value="0" type="radio" {% if request.GET.registered == '0' %}checked{% endif %}/>
+                                    <span>приписані</span>
+                                </label>
+                            </div>
+                            <div class="col s4">
+                                <label>
+                                    <input class="with-gap" name="registered" value="1" type="radio" {% if request.GET.registered == '1' %}checked{% endif %}/>
+                                    <span>виписані</span>
+                                </label>
+                            </div>
+
+                        </div>
+                        <hr>
+                        <p class="center"><i>Записів: {{ persons_count }}</i></p>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col s9">
+            <nav class="dashboard-nav">
+                <div class="nav-wrapper">
+                    <ul class="left">
+                        <li><a target="_blank" href="{% url "add_person" %}">Додати до списку<i
+                                class="material-icons right">add</i></a></li>
+                    </ul>
+                    <ul class="right">
+                        <li><a href="#">Гуртожитки</a></li>
+                        <li><a href="#">Книги</a></li>
+                        <li><a href="#">Нас. Пункти</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url "logout" %}">Вийти</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="row dashboard-table">
+                <table class="striped">
+                    <thead>
+                    <tr>
+                        {% for field in table_fields %}
+                            <th>{{ field }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for p in persons %}
+                        <tr class="grey-on-hover">
+                            {% for f in p %}
+                                <td class="text-nowrap">{{ f }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="center">
+
+                <ul class="pagination">
+
+
+                    {% if persons_paginator.has_previous %}
+                        <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.previous_page_number }}"><i class="material-icons">chevron_left</i></a></li>
+                        <li class="waves-effect"><a href="{{ path_without_page }}page=1">1</a></li>
+                    {% else %}
+                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                    {% endif %}
+
+                    <li class="active"><a href="#!">{{ persons_paginator.number }} </a></li>
+
+                    {% if persons_paginator.has_next %}
+                        <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.paginator.num_pages }}">{{ persons_paginator.paginator.num_pages }}</a></li>
+                        <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.next_page_number }}"><i class="material-icons">chevron_right</i></a></li>
+
+                    {% else %}
+                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
