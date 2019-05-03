@@ -218,7 +218,7 @@
                         <li><a href="#">Книги</a></li>
                         <li><a href="#">Нас. Пункти</a></li>
                         {% if user.is_authenticated %}
-                            <li><a href="{% url "logout" %}">Вийти</a></li>
+                            <li><a href="{% url "logout" %}">Вийти - {{ request.user.username }}</a></li>
                         {% endif %}
                     </ul>
                 </div>

@@ -1,7 +1,10 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.contrib.auth import login, logout
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db.models import Q
 from .models import Person, Locality, BookNumber, Hostel
 from .serializers import PersonTableSerializer
@@ -18,6 +21,7 @@ def pdb_test_view(request):
     return HttpResponse("All done!")
 
 
+@login_required
 def dashboard_view(request):
     request.GET = request.GET.copy()
 
@@ -183,6 +187,21 @@ def logout_view(request):
 
 
 def login_view(request):
-    # logout(request)
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)
+        if form.is_valid():
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                if request.GET.get('next'):
+                    return HttpResponseRedirect(request.GET.get('next'))
+                else:
+                    return redirect('main')
 
-    return redirect('main')
+        # if form is not valid or user is None
+        messages.error(request, "Будь ласка, введіть правильні ім'я користувача та пароль.")
+        messages.error(request, "Зауважте, що обидва поля чутливі до регістру.")
+
+    return render(request=request, template_name="login.html", context={})
