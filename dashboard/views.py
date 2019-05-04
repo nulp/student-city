@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from .models import Person, Locality, BookNumber, Hostel
+from .forms import PersonForm
 from .serializers import PersonTableSerializer
 
 from .utils import populate_db, get_default_person_order, get_ukrainian_person_field_names, \
@@ -19,6 +20,18 @@ from functools import reduce
 def pdb_test_view(request):
     populate_db()
     return HttpResponse("All done!")
+
+
+def person_view(request, pk):
+    return HttpResponse("All done!")
+
+
+def create_person_view(request):
+
+    ctx = {
+        'form': PersonForm,
+    }
+    return render(request, template_name='person_create.html', context=ctx)
 
 
 @login_required

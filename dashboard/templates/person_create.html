@@ -1,0 +1,341 @@
+{% extends 'index.html' %}
+
+
+{% block title %}
+    Додати запис | Студмістечко
+{% endblock %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+
+            <div class="col s12">
+                <div class="card-panel">
+                    <p class="flow-text center">Додати запис</p>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Surname | Name | Patronymic -->
+                        <div class="row no-margin-bottom">
+                            <div class="col s4">
+                                <label for="id_surname">Прізвище:</label>
+                                <input type="text" name="surname" maxlength="128"
+                                       required id="id_surname">
+                            </div>
+                            <div class="col s4">
+                                <label for="id_name">Ім'я:</label>
+                                <input type="text" name="name" maxlength="128" required
+                                       id="id_name">
+                            </div>
+                            <div class="col s4">
+                                <label for="id_patronymic">Побатькові:</label>
+                                <input type="text" name="patronymic"
+                                       maxlength="128" id="id_patronymic">
+                            </div>
+                        </div>
+
+                        <!--  -->
+                        <div class="row no-margin-bottom">
+                            <div class="input-field col s6">
+
+                            </div>
+                            <div class="input-field col s6">
+
+                            </div>
+                        </div>
+
+                        <p>
+                            <label for="id_birthday">Дата народження:</label>
+                            <input type="text" name="birthday"
+                                   required
+                                   id="id_birthday"></p>
+                        <p>
+                            <label for="id_unique_number">Унікальний номер:</label>
+                            <input type="text"
+                                   name="unique_number"
+                                   maxlength="100"
+                                   id="id_unique_number">
+                        </p>
+                        <p>
+                            <label for="id_passport_number">Номер паспорта:</label>
+                            <input type="text"
+                                   name="passport_number"
+                                   maxlength="32" required
+                                   id="id_passport_number">
+                        </p>
+                        <p>
+                            <label for="id_passport_authority">Орган видачі паспорта:</label>
+                            <input type="text"
+                                   name="passport_authority"
+                                   maxlength="128"
+                                   required
+                                   id="id_passport_authority">
+                        </p>
+                        <p>
+                            <label for="id_date_of_issue">Дата видачі:</label>
+                            <input type="text" name="date_of_issue"
+                                   required id="id_date_of_issue">
+                        </p>
+                        <p>
+                            <label for="id_registered_date">Дата реєстрації:</label>
+                            <input type="text"
+                                   name="registered_date"
+                                   required
+                                   id="id_registered_date">
+                        </p>
+                        <p>
+                            <label for="id_de_registered_date">Дата виписки:</label>
+                            <input type="text"
+                                   name="de_registered_date"
+                                   id="id_de_registered_date">
+                        </p>
+                        <p><label for="id_new_address">Куди зареєтрований:</label>
+                            <input type="text" name="new_address"
+                                   maxlength="256"
+                                   placeholder="(Місто, Р-н, Вул, будинок, квартира)"
+                                   id="id_new_address">
+                        </p>
+
+
+                        <!-- Book | Pasportyst -->
+                        <div class="row no-margin-bottom">
+                            <div class="col s6">
+                                <label for="id_book">Книга:</label>
+                                <select class="browser-default"
+                                        name="book"
+                                        required
+                                        id="id_book"
+                                        data-source="{% url 'book_number_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="number">
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                            <div class="col s6">
+                                <label for="id_pasportyst">Паспортист:</label>
+                                <select class="browser-default"
+                                        name="pasportyst" required
+                                        id="id_pasportyst"
+                                        data-source="{% url 'pasportyst_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name">
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="row no-margin-bottom">
+                            <div class="input-field col s6">
+
+                            </div>
+                            <div class="input-field col s6">
+
+                            </div>
+                        </div>
+
+
+                        <!-- Locality -->
+                        <div class="row">
+                            <div class="col s6">
+                                <label for="id_country">Країна:</label>
+                                <select class="browser-default"
+                                        name="country"
+                                        id="id_country"
+                                        data-source="{% url 'country_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name"
+                                        required>
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                            <div class="col s6">
+                                <label for="id_region">Область:</label>
+                                <select class="browser-default"
+                                        name="region"
+                                        id="id_region"
+                                        data-source="{% url 'region_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name"
+                                        required>
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                            <div class="col s4">
+                                <label for="id_district">Район:</label>
+                                <select class="browser-default"
+                                        name="district"
+                                        id="id_district"
+                                        data-source="{% url 'district_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name"
+                                        required>
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                            <div class="col s4">
+                                <label for="id_type_locality">Категорія н.п.:</label>
+                                <select class="browser-default"
+                                        name="type_locality"
+                                        id="id_type_locality"
+                                        data-source="{% url 'type_locality_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name"
+                                        required>
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                            <div class="col s4">
+                                <label for="id_locality">Нас. пункт:</label>
+                                <select class="browser-default"
+                                        name="locality"
+                                        id="id_locality"
+                                        data-source="{% url 'locality_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name"
+                                        required>
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Hostel | Room -->
+                        <div class="row no-margin-bottom">
+                            <div class="col s6">
+                                <label for="id_hostel">Гуртожиток:</label>
+                                <select class="browser-default"
+                                        name="hostel"
+                                        required id="id_hostel"
+                                        data-source="{% url 'hostel_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="number">
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                            <div class="input-field col s6">
+                                <label for="id_room">Кімната:</label>
+                                <input type="text" name="room" maxlength="32"
+                                       id="id_room">
+                            </div>
+                        </div>
+
+                        <p>
+                            <label for="id_note">Примітка:</label>
+                            <textarea name="note" cols="40" rows="10" id="id_note"></textarea>
+                        </p>
+                        <p class="center">
+                            <button class="green btn waves-effect waves-light" type="submit">
+                                Зберегти
+                            </button>
+                        </p>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% block script %}
+        <script>
+            $(document).ready(function () {
+
+
+                function getValuesById(select_id, params = {}) {
+                    $('#' + select_id).each(function () {
+                        var $select = $(this);
+
+                        $select.empty()
+                            .append('<option selected="selected" value="">---------</option>')
+                        ;
+
+                        $.ajax({
+                            url: $select.attr('data-source'),
+                            data: params,
+                        }).then(function (options) {
+                            options.map(function (option) {
+                                var $option = $('<option>');
+
+                                $option
+                                    .val(option[$select.attr('data-valueKey')])
+                                    .text(option[$select.attr('data-displayKey')]);
+
+                                $select.append($option);
+                            });
+                        });
+                    });
+                }
+
+                function getBookNumbers() {
+                    getValuesById('id_book');
+                }
+
+                function getHostels() {
+                    getValuesById('id_hostel');
+                }
+
+                function getPasportysts() {
+                    getValuesById('id_pasportyst');
+                }
+
+                function getCountries() {
+                    getValuesById('id_country');
+                }
+
+                function getRegions(params = {}) {
+                    getValuesById('id_region', params);
+                }
+
+                function getDistrict(params = {}) {
+                    getValuesById('id_district', params);
+
+                    $('#id_district').append('<option value="-1">Не застосовується</option>')
+                    ;
+                }
+
+                function getLocality(params = {}) {
+                    getValuesById('id_locality', params);
+                }
+
+                function getTypeLocalities() {
+                    getValuesById('id_type_locality');
+                }
+
+                function listenForCountryChange() {
+                    $("#id_country").change(function () {
+                        getRegions({country_id: $(this).val()});
+                    });
+                }
+
+                function listenForRegionChange() {
+                    $("#id_region").change(function () {
+                        getDistrict({region_id: $(this).val()});
+                    });
+                }
+
+                function listenForDistirctChange() {
+                    $("#id_district").change(function () {
+                        getLocality({district_id: $(this).val(), region_id: $('#id_region').val()});
+                    });
+                }
+
+
+                function initPage() {
+                    getBookNumbers();
+                    getHostels();
+                    getPasportysts();
+                    getCountries();
+                    listenForCountryChange();
+                    listenForRegionChange();
+                    getTypeLocalities();
+                    listenForDistirctChange();
+                }
+
+                initPage();
+            });
+        </script>
+    {% endblock %}
+
+{% endblock %}

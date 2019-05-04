@@ -1,15 +1,26 @@
-
-from django.contrib import admin
-from django.urls import path, include
-from .views import dashboard_view, logout_view, login_view, pdb_test_view
-
+from django.urls import path
+from .views import dashboard_view, logout_view, login_view, pdb_test_view, person_view, create_person_view
+from .viewsets import ListCountryView, ListDistrictView, ListLocalityView, ListRegionView, ListBookNumberView, \
+    ListHostelView, ListPasportystView, ListTypeLocalityView
 
 # app_name = 'dashboard'
-
 urlpatterns = [
     path('', dashboard_view, name="main"),
-    path('', dashboard_view, name="add_person"),
+    path('person/create/', create_person_view, name="create_person"),
+    path('person/<int:id>/', person_view, name="show_person"),
+    path('person/<int:id>/edit/', person_view, name="edit_person"),
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name="logout"),
-    path('populate-db/', pdb_test_view,),
+    # api
+    path('country/', ListCountryView.as_view(), name="country_api"),
+    path('region/', ListRegionView.as_view(), name="region_api"),
+    path('district/', ListDistrictView.as_view(), name="district_api"),
+    path('locality/', ListLocalityView.as_view(), name="locality_api"),
+    path('pasportyst/', ListPasportystView.as_view(), name="pasportyst_api"),
+    path('hostel/', ListHostelView.as_view(), name="hostel_api"),
+    path('book-number/', ListBookNumberView.as_view(), name="book_number_api"),
+    path('type-locality/', ListTypeLocalityView.as_view(), name="type_locality_api"),
+    # testing
+    path('populate-db/', pdb_test_view, ),
+
 ]

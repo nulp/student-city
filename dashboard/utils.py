@@ -4,7 +4,6 @@ from django.utils.text import slugify
 from unidecode import unidecode
 import csv
 
-from .old_data.locations import locs
 from django.utils.timezone import get_current_timezone
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -107,6 +106,8 @@ def populate_locs():
     for name, short in tls:
         TypeLocality.objects.get_or_create(name=name, short=short)
 
+    from .old_data.locations import locs
+
     for loc in locs:
         locality_name = loc[5]
         type_locality_name = loc[7]
@@ -177,9 +178,9 @@ def populate_db():
                     for j, f in enumerate(people_fields):
                         d[f] = line[j]
 
-                    name = d['Name']
-                    surname = d["Surname"]
-                    patronymic = d['Patron']
+                    name = d['Name'].strip().capitalize()
+                    surname = d["Surname"].strip().capitalize()
+                    patronymic = d['Patron'].strip().capitalize()
                     birthday = date_before_2000(d['DateBirthday'])
                     if len(d['Room']) > 4:
                         unique_number = d['Room']
@@ -217,22 +218,25 @@ def populate_db():
 
                     bk = b[d['IdBook']]
 
-                    officer_name = bk['Vidpovidalnyj']
+                    officer_name = bk['Vidpovidalnyj'].strip()
                     book_note = bk['TextNote']
                     book_name = bk['NameBook']
 
                     user, _ = User.objects.get_or_create(username=slugify(unidecode(officer_name)),
                                                          password=slugify(unidecode(officer_name)) + '1')
-                    pasportyst, _ = Pasportyst.objects.get_or_create(active=False, user_id=user.id)
-                    pasportyst.name = officer_name
-                    pasportyst.save()
+
+                    pasportyst, _ = Pasportyst.objects.get_or_create(name=officer_name, active=True)
                     book_number, _ = BookNumber.objects.get_or_create(number=book_name)
                     book, _ = Book.objects.get_or_create(book_number_id=book_number.id, pasportyst_id=pasportyst.id,
                                                          hostel_id=hostel_id, note=book_note)
 
-                    locality_name = d['Locality']
-                    locality_district = d['District']
+                    locality_country = d['Country']
+                    locality_region_cat = d['RegionCat']
                     locality_region = d['Region']
+                    locality_district_cat = d['DistrictCat']
+                    locality_district = d['District']
+                    locality_cat = d['Category']
+                    locality_name = d['Locality']
 
                     try:
                         region = Region.objects.get(name=locality_region)
@@ -243,8 +247,12 @@ def populate_db():
                             locality = Locality.objects.get(name=locality_name, region_id=region.id)
 
                     except:
-                        bad_file_w.writerow(line)
-                        continue
+                        note += '\n' + ', '.join((locality_country, locality_region_cat, locality_region,
+                                                  locality_district_cat, locality_district, locality_cat,
+                                                  locality_name))
+                        locality = None
+                        # bad_file_w.writerow(line)
+                        # continue
 
                     person, _ = Person.objects.update_or_create(
                         name=name,
@@ -257,7 +265,10 @@ def populate_db():
                         locality=locality,
                         hostel_id=hostel_id,
                         room=room,
+                        created_by_id=user.id,
+                        updated_by_id=user.id,
                     )
+
                     person.unique_number = unique_number
                     person.passport_number = passport_number
                     person.passport_authority = passport_authority

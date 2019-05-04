@@ -6,6 +6,7 @@
 .text-nowrap {
     white-space: nowrap;
 }
+
 .dashboard-padding-from-nav {
     padding-top: 65px;
 }
@@ -20,7 +21,7 @@
 }
 
 .dashboard-table table {
-    direction:ltr;
+    direction: ltr;
 }
 
 
@@ -43,22 +44,28 @@
 }
 
 .dashboard-table th {
-    position: sticky; top: 0;
+    position: sticky;
+    top: 0;
     background: #fff !important;
 }
 
+.dashboard-table td, .dashboard-table th {
+    padding: 5px 5px !important;
+}
+
 .no-margin-bottom {
-    margin-bottom: 0!important;
+    margin-bottom: 0 !important;
 }
 
 nav {
-    background-color: #417690!important;
+    background-color: #417690 !important;
 }
 
 .pagination li.active a {
-    background-color: #417690!important;
-    color: white!important;
+    background-color: #417690 !important;
+    color: white !important;
 }
+
 .full-screen-height {
     height: 100vh;
 }
