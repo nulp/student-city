@@ -10,7 +10,7 @@
 
     <div class="row no-margin-bottom">
 
-        <div class="col s3 grey lighten-4">
+        <div id="sidebar" class="col s3 grey lighten-4 {% if not request.session.show_sidebar %}hide{% endif %}">
             <div class="row no-margin-bottom">
                 <div class="col s12">
                     <form method="GET">
@@ -179,13 +179,13 @@
                         <div class="row no-margin-bottom">
                             <div class="col s4">
                                 <label>
-                                    <input class="with-gap" name="registered" value="-1" type="radio" {% if request.GET.registered == '-1' or request.GET.registered is None %}checked{% endif %}/>
+                                    <input class="with-gap" name="registered" value="-1" type="radio" {% if request.GET.registered == '-1' %}checked{% endif %}/>
                                     <span>всі</span>
                                 </label>
                             </div>
                             <div class="col s4">
                                 <label>
-                                    <input class="with-gap" name="registered" value="0" type="radio" {% if request.GET.registered == '0' %}checked{% endif %}/>
+                                    <input class="with-gap" name="registered" value="0" type="radio" {% if request.GET.registered == '0' or request.GET.registered is None %}checked{% endif %}/>
                                     <span>приписані</span>
                                 </label>
                             </div>
@@ -205,10 +205,11 @@
 
         </div>
 
-        <div class="col s9">
+        <div id="main-table" class="col {% if request.session.show_sidebar %}s9{% else %}s12{% endif %}">
             <nav class="dashboard-nav">
                 <div class="nav-wrapper">
                     <ul class="left">
+                        <li><a id="toggle-sidebar" href="#"><i class="material-icons">apps</i></a></li>
                         <li><a target="_blank" href="{% url "create_person" %}">Додати до списку<i
                                 class="material-icons right">add</i></a></li>
                     </ul>
@@ -235,9 +236,13 @@
 
                     <tbody>
                     {% for p in persons %}
-                        <tr class="grey-on-hover">
+                        <tr class="grey-on-hover data-row ">
                             {% for f in p %}
-                                <td class="text-nowrap">{{ f }}</td>
+                                {% if f|slice:":4" == 'data' %}
+                                    <td class="hide" {{ f }}></td>
+                                {% else %}
+                                    <td class="text-nowrap">{{ f }}</td>
+                                {% endif %}
                             {% endfor %}
                         </tr>
                     {% endfor %}
@@ -271,3 +276,53 @@
         </div>
     </div>
 {% endblock %}
+
+ {% block script %}
+     <script>
+         $(document).ready(function () {
+
+
+             function listenForPersonClick() {
+                  $(".data-row").click(function () {
+                     pID = $(this).find("[data-id]").first().data('id');
+                     window.open('person/' + pID, "_blank");
+                 });
+             }
+
+
+
+             function listenForSidebar() {
+                 $("#toggle-sidebar").click(function () {
+                     $side = $("#sidebar");
+                     $main = $("#main-table");
+                     if ($side.hasClass('hide')){
+                         $side.removeClass('hide');
+                         $main.removeClass('s12');
+                         $main.addClass('s9');
+                     } else {
+                         $side.addClass('hide');
+                         $main.addClass('s12');
+                         $main.removeClass('s9');
+                     }
+
+                     $.ajax({
+                        type: 'GET',
+                        url: '{% url 'save_sidebar_view' %}',
+                        data: { get_param: 'value' },
+                        dataType: 'json',
+                        success: function (data) {
+                            {#console.log(data);#}
+                        }
+                    });
+                 });
+             }
+
+             function initPage() {
+                listenForPersonClick();
+                listenForSidebar();
+             }
+
+             initPage();
+         });
+     </script>
+ {% endblock %}

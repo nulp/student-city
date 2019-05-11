@@ -2,7 +2,7 @@
 
 
 {% block title %}
-    Вхід | Студмістечко
+    Запис: #{{ person.id }}| №{{ person.number_in_book }} в книзі {{ person.book_number }} | Студмістечко
 {% endblock %}
 
 
@@ -12,18 +12,105 @@
 
             <div class="col s12">
                 <div class="card-panel">
-                    <p class="flow-text center">Увійти</p>
-                    <form method="POST">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                    </form>
+                    <h4 class="center">Запис: <b>#{{ person.id }}</b> | <b>№{{ person.number_in_book }}</b> в книзі <b>{{ person.book_number }}</b></h4>
+
+                    <div class="row">
+
+                        <div class="col s12">
+                            <p class="center">
+                                <a class="waves-effect waves-light btn green"
+                                   href="{% url 'edit_person' pk=person.pk %}">Редагувати</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col l6 s12">
+                            <h6 class=""><b>ПІБ: </b>{{ person.surname }} {{ person.name }} {{ person.patronymic }}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Дата народження: </b>{{ person.birthday|date:"d.m.Y" }}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Унікальний номер: </b>{% if person.unique_number %}{{ person.unique_number }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Номер паспорта: </b>{% if person.passport_number %}{{ person.passport_number }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Орган видачі: </b>{% if person.passport_authority %}{{ person.passport_authority }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Дата видачі: </b>{% if person.date_of_issue %}{{ person.date_of_issue|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Дата реєстрації: </b>{% if person.registered_date %}{{ person.registered_date|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Дата виписки: </b>{% if person.de_registered_date %}{{ person.de_registered_date|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col s12">
+                            <h6 class=""><b>Куди зареєст.: </b>{% if person.new_address %}{{ person.new_address }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Книга: </b>{% if person.book_number %}{{ person.book_number }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Паспортист: </b>{% if person.pasportyst %}{{ person.pasportyst }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col s12">
+                            <h6 class=""><b>Нас. Пункт: </b>{% if person.locality %}{{ person.locality.full_locality }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Гуртожиток: </b>{% if person.hostel %}{{ person.hostel.number }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Кімната: </b>{% if person.room %}{{ person.room }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                         <div class="col l6 s12">
+                            <h6 class=""><b>Примітка: </b>{% if person.note %}{{ person.note }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <hr>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Створено: </b>{% if person.created %}{{ person.created|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Створив: </b>{% if person.created_by %}{{ person.created_by.username }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Редаговано: </b>{% if person.updated %}{{ person.updated|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l6 s12">
+                            <h6 class=""><b>Редагував: </b>{% if person.updated_by %}{{ person.updated_by.username }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <h5 class="center">Історія змін</h5>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col s12">
+                            <p class="center">
+                                <a class="waves-effect waves-light btn red accent-2"
+                                   href="{% url 'main' %}">Видалити</a>
+                            </p>
+                        </div>
+                    </div>
 
                 </div>
             </div>
-
         </div>
     </div>
+{% endblock %}
 
+{% block script %}
+    <script>
+        $(document).ready(function () {
 
-
+        });
+    </script>
 {% endblock %}

@@ -5,7 +5,7 @@ from .models import Country, Region, District, Locality, TypeLocality, BookNumbe
 
 
 class ListCountryView(ListAPIView):
-    queryset = Country.objects.all()
+    queryset = Country.objects.all().order_by('name')
     serializer_class = CountrySerializer
 
 
@@ -15,7 +15,7 @@ class ListRegionView(ListAPIView):
         country_id = self.request.query_params.get('country_id', None)
         if country_id is not None:
             queryset = queryset.filter(country_id=country_id)
-        return queryset
+        return queryset.order_by('name')
 
     serializer_class = RegionSerializer
 
@@ -26,7 +26,7 @@ class ListDistrictView(ListAPIView):
         region_id = self.request.query_params.get('region_id', None)
         if region_id is not None:
             queryset = queryset.filter(region_id=region_id)
-        return queryset
+        return queryset.order_by('name')
 
     serializer_class = DistrictSerializer
 
@@ -36,14 +36,19 @@ class ListLocalityView(ListAPIView):
         queryset = Locality.objects.all()
         region_id = self.request.query_params.get('region_id', None)
         district_id = self.request.query_params.get('district_id', None)
+        type_locality_id = self.request.query_params.get('type_locality_id', None)
+
+        if region_id is not None:
+            queryset = queryset.filter(region_id=region_id)
         if district_id is not None:
-            if region_id is not None and district_id == '-1':
+            if district_id == '-1':
                 queryset = queryset.filter(region_id=region_id, district_id=None)
             else:
                 queryset = queryset.filter(district_id=district_id)
-        elif region_id is not None:
-            queryset = queryset.filter(region_id=region_id)
-        return queryset
+        if type_locality_id is not None:
+            queryset = queryset.filter(l_type_id=type_locality_id)
+
+        return queryset.order_by('name')
 
     serializer_class = LocalitySerializer
 
@@ -67,6 +72,6 @@ class ListBookNumberView(ListAPIView):
 
 
 class ListPasportystView(ListAPIView):
-    queryset = Pasportyst.objects.all()
+    queryset = Pasportyst.objects.all().order_by('name')
 
     serializer_class = PasportystSerializer

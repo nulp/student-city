@@ -1,14 +1,20 @@
 from django.urls import path
-from .views import dashboard_view, logout_view, login_view, pdb_test_view, person_view, create_person_view
+from .views import dashboard_view, logout_view, login_view, pdb_test_view, person_view, create_person_view, \
+    edit_person_view, save_sidebar_view
 from .viewsets import ListCountryView, ListDistrictView, ListLocalityView, ListRegionView, ListBookNumberView, \
     ListHostelView, ListPasportystView, ListTypeLocalityView
 
 # app_name = 'dashboard'
+
 urlpatterns = [
     path('', dashboard_view, name="main"),
+    # session
+    path('save_sidebar_view/', save_sidebar_view, name="save_sidebar_view"),
+    # person
     path('person/create/', create_person_view, name="create_person"),
-    path('person/<int:id>/', person_view, name="show_person"),
-    path('person/<int:id>/edit/', person_view, name="edit_person"),
+    path('person/<int:pk>/', person_view, name="show_person"),
+    path('person/<int:pk>/edit/', edit_person_view, name="edit_person"),
+    # auth
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name="logout"),
     # api

@@ -8,6 +8,9 @@ class Country(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
+
 
 class Region(models.Model):
     # область
@@ -18,6 +21,9 @@ class Region(models.Model):
         return self.name
 
 
+    class Meta:
+        ordering = ['name']
+
 class District(models.Model):
     # район
     name = models.CharField(db_index=True, max_length=256)
@@ -26,6 +32,8 @@ class District(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
 
 class TypeLocality(models.Model):
     name = models.CharField(max_length=32)
@@ -45,14 +53,18 @@ class Locality(models.Model):
     def __str__(self):
         return self.l_type.short + ' ' + self.name
 
+    class Meta:
+        ordering = ['name']
+
     @property
     def full_locality(self):
         country_name = self.region.country.name
         region_name = self.region.name
-        district_name = self.region.name
         short_type_l = self.l_type.short
         if self.district:
             district_name = ' ' + self.district.name + ','
+        else:
+            district_name = ''
         return f"{country_name}, {region_name},{district_name} {short_type_l} {self.name}"
 
 
@@ -124,7 +136,7 @@ class Person(models.Model):
 
     registered_date = models.DateField(db_index=True, null=True)
     de_registered_date = models.DateField(db_index=True, null=True, blank=True)
-    new_address = models.CharField(max_length=256, default='', blank=True)
+    new_address = models.CharField(max_length=256, default='', null=True, blank=True)
 
     book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
     number_in_book = models.IntegerField(default=0, blank=True)
@@ -143,6 +155,10 @@ class Person(models.Model):
                                    null=True)
 
     note = models.TextField(blank=True)
+
+    @property
+    def book_number(self):
+        return self.book.book_number
 
     def __str__(self):
         return self.name + ' ' + self.surname

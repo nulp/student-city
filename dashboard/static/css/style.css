@@ -69,3 +69,10 @@ nav {
 .full-screen-height {
     height: 100vh;
 }
+
+#main-table {
+    padding: 0;
+}
+#main-table > .dashboard-table {
+    padding: 0 .75rem!important;
+}

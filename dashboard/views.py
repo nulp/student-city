@@ -1,12 +1,12 @@
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import Person, Locality, BookNumber, Hostel
+from .models import Person, Locality, BookNumber, Hostel, Pasportyst, Country, Region, District, TypeLocality
 from .forms import PersonForm
 from .serializers import PersonTableSerializer
 
@@ -22,14 +22,107 @@ def pdb_test_view(request):
     return HttpResponse("All done!")
 
 
+@login_required
 def person_view(request, pk):
-    return HttpResponse("All done!")
+    person = get_object_or_404(Person, pk=pk)
+    return render(request, template_name='person.html', context={'person': person})
 
 
-def create_person_view(request):
+@login_required
+def save_sidebar_view(request):
+    if request.session.get('show_sidebar', False):
+        request.session['show_sidebar'] = False
+    else:
+        request.session['show_sidebar'] = True
+
+    return JsonResponse({'show': request.session['show_sidebar']})
+
+
+
+
+@login_required
+def edit_person_view(request, pk):
+
+    person = get_object_or_404(Person, pk=pk)
+
+    if request.method == 'POST':
+        form = PersonForm(request.POST, instance=person)
+        if form.is_valid():
+            person = form.save()
+
+            person.updated_by = request.user
+            person.save()
+
+            messages.info(request, f"Запис №{person.id} змінено!")
+            return redirect('show_person', pk=person.pk)
+        else:
+            person = form.cleaned_data
+
+    districts = None
+    regions = None
+    localities = None
+
+    if person.locality:
+        regions = Region.objects.filter(country_id=person.locality.region.country_id)
+        districts = District.objects.filter(region_id=person.locality.region_id)
+        localities = Locality.objects.filter(region_id=person.locality.region_id, district_id=person.locality.district_id, l_type_id=person.locality.l_type_id)
 
     ctx = {
-        'form': PersonForm,
+        'person': person,
+        'book_numbers': BookNumber.objects.all(),
+        'pasportysts': Pasportyst.objects.all(),
+        'hostels': Hostel.objects.all(),
+        'countries': Country.objects.all(),
+        'districts': districts,
+        'regions': regions,
+        'type_localities': TypeLocality.objects.all(),
+        'localities': localities,
+    }
+
+    return render(request, template_name='person_edit.html', context=ctx)
+
+
+@login_required
+def create_person_view(request):
+
+    person = {}
+
+    locality = None
+
+    if request.method == 'POST':
+        form = PersonForm(request.POST)
+        if form.is_valid():
+            person = form.save()
+
+            person.created_by = request.user
+            person.save()
+
+            messages.info(request, f"Запис №{person.id} створено!")
+            return redirect('show_person', pk=person.pk)
+        else:
+            person = form.cleaned_data
+            locality = person.get('locality', None)
+
+    districts = None
+    regions = None
+    localities = None
+
+    if locality is not None:
+        regions = Region.objects.filter(country_id=locality.region.country_id)
+        districts = District.objects.filter(region_id=locality.region_id)
+        localities = Locality.objects.filter(region_id=locality.region_id,
+                                             district_id=locality.district_id)
+
+    ctx = {
+        'person': person,
+        'book_numbers': BookNumber.objects.all(),
+        'pasportysts': Pasportyst.objects.all(),
+        'hostels': Hostel.objects.all(),
+        'countries': Country.objects.all(),
+        'districts': districts,
+        'regions': regions,
+        'type_localities': TypeLocality.objects.all(),
+        'localities': localities,
     }
     return render(request, template_name='person_create.html', context=ctx)
 
@@ -124,7 +217,7 @@ def dashboard_view(request):
             pass
 
     # filter by de_registration (if address is present) from request
-    registered = request.GET.get('registered', '-1')
+    registered = request.GET.get('registered', '0')
     if registered == '0':
         person_filters.append(Q(new_address__exact=''))
         person_filters.append(Q(new_address__isnull=False))
@@ -173,6 +266,8 @@ def dashboard_view(request):
                 e = '-'
             row.append(e)
 
+        row.append(f'data-id={pd.get("id")}')
+
         persons[i] = row
 
     # additional context data
@@ -216,5 +311,11 @@ def login_view(request):
         # if form is not valid or user is None
         messages.error(request, "Будь ласка, введіть правильні ім'я користувача та пароль.")
         messages.error(request, "Зауважте, що обидва поля чутливі до регістру.")
+
+    if request.user.is_authenticated:
+        if request.GET.get('next'):
+            return HttpResponseRedirect(request.GET.get('next'))
+        else:
+            return redirect('main')
 
     return render(request=request, template_name="login.html", context={})

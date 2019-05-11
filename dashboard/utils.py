@@ -5,7 +5,7 @@ from unidecode import unidecode
 import csv
 
 from django.utils.timezone import get_current_timezone
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from urllib.parse import urlparse, parse_qs, urlencode
@@ -36,7 +36,7 @@ def date_delta_years(date, years):
 def get_default_person_order():
     order = ['id', 'surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
              'passport_authority',
-             'date_of_issue', 'registered_date', 'de_registered_date', 'new_address', 'book', 'number_in_book',
+             'date_of_issue', 'registered_date', 'de_registered_date', 'new_address', 'book_number', 'number_in_book',
              'pasportyst',
              'locality', 'hostel', 'room', 'created', 'updated', 'note']
 
@@ -56,7 +56,7 @@ def get_ukrainian_person_field_names():
              'registered_date': 'Дата реєстації',
              'de_registered_date': 'Дата виписки',
              'new_address': 'Куди зареєст.',
-             'book': 'Книга',
+             'book_number': 'Книга',
              'number_in_book': 'Номер в книзі',
              'pasportyst': 'Паспортист',
              'locality': 'Нас. Пункт',
@@ -129,8 +129,8 @@ def populate_locs():
 
 
 def populate_db():
-    populate_locs()
-    populate_hostels()
+    # populate_locs()
+    # populate_hostels()
 
     b = {}
 
@@ -182,16 +182,30 @@ def populate_db():
                     surname = d["Surname"].strip().capitalize()
                     patronymic = d['Patron'].strip().capitalize()
                     birthday = date_before_2000(d['DateBirthday'])
-                    if len(d['Room']) > 4:
-                        unique_number = d['Room']
-                        room = None
-                    else:
-                        room = d['Room']
-                        unique_number = None
 
+                    unique_number = None
                     passport_number = None
                     passport_authority = None
                     date_of_issue = None
+
+                    if len(d['Room']) > 4:
+                        data = [e.strip() for e in d['Room'].split(',')]
+                        if len(data) == 4:
+                            unique_number, passport_number, passport_authority, date_of_issue = data
+                            try:
+                                date_of_issue = datetime.strptime(date_of_issue, "%d.%m.%y").date()
+                            except:
+                                try:
+                                    date_of_issue = datetime.strptime(date_of_issue, "%d.%m.%Y").date()
+                                except:
+                                    unique_number += ', ' + date_of_issue
+                                    date_of_issue = None
+                        else:
+                            unique_number = ', '.join(data)
+
+                        room = None
+                    else:
+                        room = d['Room']
 
                     registered_date = date_before_2000(d['DatePropysky'])
                     try:

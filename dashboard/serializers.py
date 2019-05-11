@@ -64,13 +64,13 @@ class PersonSerializer(serializers.ModelSerializer):
 class PersonTableSerializer(serializers.ModelSerializer):
     locality = serializers.SerializerMethodField()
     hostel = serializers.SerializerMethodField()
-    book = serializers.SerializerMethodField()
+    book_number = serializers.SerializerMethodField()
     room = serializers.SerializerMethodField()
     pasportyst = serializers.SerializerMethodField()
 
     class Meta:
         model = Person
-        fields = ('pasportyst', 'book',
+        fields = ('pasportyst', 'book_number',
                   'locality', 'hostel', 'room',
                   'id', 'name', 'surname', 'patronymic', 'birthday', 'unique_number', 'passport_number',
                   'passport_authority',
@@ -85,8 +85,8 @@ class PersonTableSerializer(serializers.ModelSerializer):
     def get_hostel(self, obj):
         return obj.hostel.number
 
-    def get_book(self, obj):
-        return obj.book.number
+    def get_book_number(self, obj):
+        return obj.book_number
 
     def get_room(self, obj):
         return obj.room
