@@ -1,17 +1,20 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import Person, Locality, BookNumber, Hostel, Pasportyst, Country, Region, District, TypeLocality
+from .models import Person, Locality, BookNumber, Hostel, Pasportyst, Country, Region, District, TypeLocality, \
+    PersonHistory
 from .forms import PersonForm
 from .serializers import PersonTableSerializer
 
 from .utils import populate_db, get_default_person_order, get_ukrainian_person_field_names, \
     str2date, get_url_without_param, date_delta_years
+import datetime
+import json
 
 import operator
 from functools import reduce
@@ -25,7 +28,46 @@ def pdb_test_view(request):
 @login_required
 def person_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
-    return render(request, template_name='person.html', context={'person': person})
+    history = PersonHistory.objects.filter(person_id=person.id)
+    table_fields = ['surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
+                     'passport_authority',
+                     'date_of_issue', 'registered_date', 'de_registered_date', 'new_address', 'book_number', 'number_in_book',
+                     'pasportyst',
+                     'locality', 'hostel', 'room', 'created', 'updated', 'note']
+
+    history = [p for p in history]
+    for i, p in enumerate(history):
+        row = []
+        pd = json.loads(p.data)
+        for f in table_fields:
+
+            e = pd.get(f, None)
+            if e is None:
+                e = '-'
+            row.append(e)
+        history[i] = [p.edited_by, str(p.timestamp)] + row
+
+    ukr_names = get_ukrainian_person_field_names()
+    table_fields = ['edited_by', 'edited_time'] + table_fields
+    ctx = {'person': person, 'history': history, 'table_fields': [ukr_names[x] for x in table_fields],}
+    return render(request, template_name='person.html', context=ctx)
+
+
+@login_required
+def delete_person_view(request, pk):
+    person = get_object_or_404(Person, pk=pk)
+
+    person.deleted = True
+    person.deleted_by_id = request.user.id
+    person.save()
+
+    return redirect('show_person', pk=pk)
+
+
+# @login_required
+# def person_history_view(request, pk):
+#     person = get_object_or_404(Person, pk=pk)
+#     return render(request, template_name='person.html', context={'person': person})
 
 
 @login_required
@@ -38,12 +80,12 @@ def save_sidebar_view(request):
     return JsonResponse({'show': request.session['show_sidebar']})
 
 
-
-
 @login_required
 def edit_person_view(request, pk):
-
     person = get_object_or_404(Person, pk=pk)
+
+    if person.deleted:
+        raise Http404
 
     if request.method == 'POST':
         form = PersonForm(request.POST, instance=person)
@@ -52,6 +94,11 @@ def edit_person_view(request, pk):
 
             person.updated_by = request.user
             person.save()
+
+            prev = PersonHistory.objects.filter(person_id=person.id).order_by('-timestamp').first()
+            cur_text = json.dumps(PersonTableSerializer(person).data)
+            if not prev or not prev.data == cur_text:
+                PersonHistory.objects.create(person_id=person.id, data=cur_text, edited_by_id=request.user.id)
 
             messages.info(request, f"Запис №{person.id} змінено!")
             return redirect('show_person', pk=person.pk)
@@ -65,7 +112,9 @@ def edit_person_view(request, pk):
     if person.locality:
         regions = Region.objects.filter(country_id=person.locality.region.country_id)
         districts = District.objects.filter(region_id=person.locality.region_id)
-        localities = Locality.objects.filter(region_id=person.locality.region_id, district_id=person.locality.district_id, l_type_id=person.locality.l_type_id)
+        localities = Locality.objects.filter(region_id=person.locality.region_id,
+                                             district_id=person.locality.district_id,
+                                             l_type_id=person.locality.l_type_id)
 
     ctx = {
         'person': person,
@@ -84,7 +133,6 @@ def edit_person_view(request, pk):
 
 @login_required
 def create_person_view(request):
-
     person = {}
 
     locality = None
@@ -96,6 +144,11 @@ def create_person_view(request):
 
             person.created_by = request.user
             person.save()
+
+            prev = PersonHistory.objects.filter(person_id=person.id).order_by('-timestamp').first()
+            cur_text = json.dumps(PersonTableSerializer(person).data)
+            if not prev or not prev.data == cur_text:
+                PersonHistory.objects.create(person_id=person.id, data=cur_text, edited_by_id=request.user.id)
 
             messages.info(request, f"Запис №{person.id} створено!")
             return redirect('show_person', pk=person.pk)
@@ -233,15 +286,20 @@ def dashboard_view(request):
     else:
         ordering = ['hostel_id', 'surname', 'name', 'patronymic']
 
+    if request.GET.get('deleted', None) is not None:
+        persons = Person.people.deleted()
+    else:
+        persons = Person.people.active()
+
     # getting person queryset based on order and filters
     if person_filters:
         if len(person_filters) > 1:
             filter_query = reduce(operator.and_, person_filters)
         else:
             filter_query = person_filters[0]
-        persons = Person.objects.all().filter(filter_query).order_by(*ordering)
+        persons = persons.filter(filter_query).order_by(*ordering)
     else:
-        persons = Person.objects.all().order_by(*ordering)
+        persons = persons.order_by(*ordering)
 
     if registered == '1':
         persons = persons.exclude(Q(new_address__isnull=True) | Q(new_address__exact=''))

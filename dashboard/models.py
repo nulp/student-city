@@ -109,6 +109,34 @@ class Book(models.Model):
         return str(self.book_number) + ' ' + str(self.pasportyst) + ' ' + str(self.hostel)
 
 
+class PersonQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(deleted=False)
+
+    def deleted(self):
+        return self.filter(deleted=True)
+
+    def any(self):
+        return self
+
+
+class PersonManager(models.Manager):
+    def get_queryset(self):
+        return PersonQuerySet(self.model, using=self._db)
+
+    def editors(self):
+        return
+
+    def active(self):
+        return self.get_queryset().active()
+
+    def deleted(self):
+        return self.get_queryset().deleted()
+
+    def any(self):
+        return self.get_queryset().any()
+
+
 class Person(models.Model):
 
     def n_in_b(self):
@@ -154,7 +182,14 @@ class Person(models.Model):
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="persons_updated", default=None,
                                    null=True)
 
+    deleted = models.BooleanField(default=False)
+    deleted_time = models.DateTimeField(auto_now=True, blank=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
     note = models.TextField(blank=True)
+
+    people = PersonManager()
+    objects = models.Manager()
 
     @property
     def book_number(self):
@@ -167,8 +202,11 @@ class Person(models.Model):
 class PersonHistory(models.Model):
     person_id = models.PositiveIntegerField(db_index=True)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
+    edited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     data = models.TextField()
 
 
 class DeletedPerson(models.Model):
     person_id = models.PositiveIntegerField(db_index=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+    timestamp = models.DateTimeField(auto_now_add=True, blank=True)

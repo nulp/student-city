@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import dashboard_view, logout_view, login_view, pdb_test_view, person_view, create_person_view, \
-    edit_person_view, save_sidebar_view
+    edit_person_view, save_sidebar_view, delete_person_view
 from .viewsets import ListCountryView, ListDistrictView, ListLocalityView, ListRegionView, ListBookNumberView, \
     ListHostelView, ListPasportystView, ListTypeLocalityView
 
@@ -14,6 +14,7 @@ urlpatterns = [
     path('person/create/', create_person_view, name="create_person"),
     path('person/<int:pk>/', person_view, name="show_person"),
     path('person/<int:pk>/edit/', edit_person_view, name="edit_person"),
+    path('person/<int:pk>/delete/', delete_person_view, name="delete_person"),
     # auth
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name="logout"),

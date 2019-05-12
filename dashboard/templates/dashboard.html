@@ -214,10 +214,18 @@
                                 class="material-icons right">add</i></a></li>
                     </ul>
                     <ul class="right">
-                        <li><a href="#">Гуртожитки</a></li>
-                        <li><a href="#">Книги</a></li>
-                        <li><a href="#">Нас. Пункти</a></li>
+{#                        <li><a href="#">Гуртожитки</a></li>#}
+{#                        <li><a href="#">Книги</a></li>#}
+{#                        <li><a href="#">Нас. Пункти</a></li>#}
+                        {% if user.is_staff %}
+
+                        {% endif %}
                         {% if user.is_authenticated %}
+                            {% if request.GET.deleted %}
+                                <li><a href="{% url "main" %}">Активні</a></li>
+                            {% else %}
+                                <li><a href="{% url "main" %}?deleted=1">Видалені</a></li>
+                            {% endif %}
                             <li><a href="{% url "logout" %}">Вийти - {{ request.user.username }}</a></li>
                         {% endif %}
                     </ul>
@@ -308,7 +316,6 @@
                      $.ajax({
                         type: 'GET',
                         url: '{% url 'save_sidebar_view' %}',
-                        data: { get_param: 'value' },
                         dataType: 'json',
                         success: function (data) {
                             {#console.log(data);#}

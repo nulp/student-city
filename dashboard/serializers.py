@@ -86,7 +86,7 @@ class PersonTableSerializer(serializers.ModelSerializer):
         return obj.hostel.number
 
     def get_book_number(self, obj):
-        return obj.book_number
+        return obj.book_number.number
 
     def get_room(self, obj):
         return obj.room

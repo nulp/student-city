@@ -64,7 +64,9 @@ def get_ukrainian_person_field_names():
              'room': 'Кімната',
              'created': 'Створено',
              'updated': 'Змінено',
-             'note': 'Примітка'}
+             'note': 'Примітка',
+             'edited_by': 'Змінив',
+             'edited_time': 'Час'}
     return names
 
 

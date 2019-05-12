@@ -1,5 +1,6 @@
 from django import forms
-from .models import Person, BookNumber, Book
+from .models import Person, BookNumber, Book, PersonHistory
+from  .serializers import PersonTableSerializer
 
 
 class PersonForm(forms.ModelForm):
@@ -13,24 +14,24 @@ class PersonForm(forms.ModelForm):
                   'pasportyst',
                   'locality', 'hostel', 'room', 'note']
 
-
-    def clean_name(self):
-        data = self.cleaned_data['name']
-        # if "fred@example.com" not in data:
-        #     raise forms.ValidationError("You have forgotten about Fred!")
-
-        return data
+    # def clean_name(self):
+    #     data = self.cleaned_data['name']
+    #     # if "fred@example.com" not in data:
+    #     #     raise forms.ValidationError("You have forgotten about Fred!")
+    #
+    #     return data
 
     def save(self, commit=True):
         person = super(PersonForm, self).save(commit=False)
         # do custom stuff
 
-        book, _ = Book.objects.get_or_create(book_number_id=self.cleaned_data.get('book_number').id, pasportyst_id=self.cleaned_data.get('pasportyst').id, hostel_id=self.cleaned_data.get('hostel').id)
+        book, _ = Book.objects.get_or_create(book_number_id=self.cleaned_data.get('book_number').id,
+                                             pasportyst_id=self.cleaned_data.get('pasportyst').id,
+                                             hostel_id=self.cleaned_data.get('hostel').id)
         person.book = book
 
         if person.number_in_book is None or person.number_in_book == 0:
             person.number_in_book = person.n_in_b()
-
 
         if commit:
             person.save()
