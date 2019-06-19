@@ -13,6 +13,9 @@
                 <li><a id="close-or-back" href="javascript:"><i class="material-icons">arrow_back</i></a></li>
             </ul>
             <ul class="right">
+                <li><a id="add-locality-nav-btn" target="_blank" href="javascript:">Додати наслений пункт<i
+                                class="material-icons right">add</i></a></li>
+
                 {% if user.is_authenticated %}
                     <li><a href="{% url "logout" %}">Вийти - {{ request.user.username }}</a></li>
                 {% endif %}
@@ -134,7 +137,24 @@
                  });
              }
 
+
+             function listenForAddLocalityBTN() {
+                 $("#add-locality-nav-btn").click(function () {
+                     var new_window = PopupCenter("{% url 'add_locality' %}", 'Додати населений пункт', 'height=400, width=800');
+                     var timer = setInterval(function () {
+                         if (new_window.closed) {
+                             if (confirm("Очистити поля для народження?"))
+                                getCountries();
+
+                             clearInterval(timer);
+                         }
+                     }, 1000);
+                 });
+             }
+
+
              function initPage() {
+
                  {% if person.locality is None %}
                      getCountries();
                      getTypeLocalities();
@@ -150,6 +170,10 @@
                  listenNcapitalize('#id_name');
                  listenNcapitalize('#id_surname');
                  listenNcapitalize('#id_patronymic');
+
+                 listenFormSubmit('#person_form_id');
+
+                 listenForAddLocalityBTN();
 
 
              }

@@ -45,13 +45,13 @@ class TypeLocality(models.Model):
 
 class Locality(models.Model):
     name = models.CharField(db_index=True, max_length=256)
-    l_type = models.ForeignKey(TypeLocality, on_delete=models.SET_NULL, null=True)
+    type_locality = models.ForeignKey(TypeLocality, on_delete=models.SET_NULL, null=True)
 
     district = models.ForeignKey(District, on_delete=models.SET_NULL, blank=True, null=True)
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return self.l_type.short + ' ' + self.name
+        return self.type_locality.short + ' ' + self.name
 
     class Meta:
         ordering = ['name']
@@ -60,7 +60,7 @@ class Locality(models.Model):
     def full_locality(self):
         country_name = self.region.country.name
         region_name = self.region.name
-        short_type_l = self.l_type.short
+        short_type_l = self.type_locality.short
         if self.district:
             district_name = ' ' + self.district.name + ','
         else:

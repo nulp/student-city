@@ -17,6 +17,10 @@ table.striped>tbody>tr:nth-child(odd) {
     background-color: rgba(238, 238, 238, 0.5);
 }
 
+
+.btn-add-margin-top{
+    margin-top: 24px;
+}
 .text-nowrap {
     white-space: nowrap;
 }

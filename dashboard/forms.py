@@ -1,6 +1,30 @@
 from django import forms
-from .models import Person, Book, PersonHistory
+from .models import Person, Book, PersonHistory, Country, Region, Locality, District
 from  .serializers import PersonTableSerializer
+
+
+class CountryForm(forms.ModelForm):
+    class Meta:
+        model = Country
+        fields = ['name']
+
+
+class RegionForm(forms.ModelForm):
+    class Meta:
+        model = Region
+        fields = ['name', 'country']
+
+
+class DistrictForm(forms.ModelForm):
+    class Meta:
+        model = District
+        fields = ['name', 'region']
+
+
+class LocalityForm(forms.ModelForm):
+    class Meta:
+        model = Locality
+        fields = ['name', 'type_locality', 'district', 'region']
 
 
 class PersonForm(forms.ModelForm):

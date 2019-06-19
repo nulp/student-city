@@ -10,7 +10,8 @@ from django.contrib import messages
 from django.db.models import Q
 from .models import Person, Locality, Hostel, Pasportyst, Country, Region, District, TypeLocality, \
     PersonHistory, Book
-from .forms import PersonForm
+
+from .forms import PersonForm, CountryForm, RegionForm, DistrictForm, LocalityForm
 from .serializers import PersonTableSerializer
 
 from .utils import populate_db, get_default_person_order, get_ukrainian_person_field_names, \
@@ -67,6 +68,59 @@ def delete_person_view(request, pk):
     return redirect('show_person', pk=pk)
 
 
+@login_required
+def add_country(request):
+
+    if request.method == 'POST':
+        form = CountryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponse("<script>window.close();window.location.href='/'</script>")
+
+    return render(request, template_name='add_country.html', context={})
+
+
+@login_required
+def add_region(request, country_id):
+
+    country = get_object_or_404(Country, id=country_id)
+
+    if request.method == 'POST':
+
+        form = RegionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponse("<script>window.close();window.location.href='/'</script>")
+
+    return render(request, template_name='add_region.html', context={'country': country})
+
+
+@login_required
+def add_district(request, region_id):
+
+    region = get_object_or_404(Region, id=region_id)
+
+    if request.method == 'POST':
+        form = DistrictForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponse("<script>window.close();window.location.href='/'</script>")
+
+    return render(request, template_name='add_district.html', context={'region': region})
+
+
+@login_required
+def add_locality(request):
+
+    if request.method == 'POST':
+        form = LocalityForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponse("<script>window.close();window.location.href='/'</script>")
+
+    return render(request, template_name='add_locality.html')
+
+
 @staff_member_required
 def restore_person_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
@@ -119,7 +173,7 @@ def edit_person_view(request, pk):
         districts = District.objects.filter(region_id=person.locality.region_id)
         localities = Locality.objects.filter(region_id=person.locality.region_id,
                                              district_id=person.locality.district_id,
-                                             l_type_id=person.locality.l_type_id)
+                                             type_locality_id=person.locality.type_locality_id)
 
     ctx = {
         'person': person,

@@ -1,0 +1,240 @@
+{% extends 'index.html' %}
+
+
+{% block title %}
+    Додати населений пункт | Студмістечко
+{% endblock %}
+
+
+{% block content %}
+    <nav class="dashboard-nav">
+        <div class="nav-wrapper">
+            <ul class="left">
+                <li><a id="close-or-back" href="javascript:"><i class="material-icons">arrow_back</i></a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+
+            <div class="col s12">
+                <div class="card-panel">
+                    <p class="flow-text center">Додати населений пункт</p>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col s10">
+                                <label for="id_country">Країна:</label>
+                                <select class="browser-default"
+                                        name="country"
+                                        id="id_country"
+                                        data-source="{% url 'country_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name"
+                                        required>
+                                    <option value="" selected>---------</option>
+                                </select>
+                            </div>
+                            <div class="col s2">
+                                <button id='add-country-btn'
+                                        class="btn-add-margin-top btn-floating btn-small waves-effect waves-light green"
+                                        type="button"><i class="material-icons">add</i></button>
+                            </div>
+                            <div class="col s10">
+                                <label for="id_region">Область:</label>
+                                <select class="browser-default"
+                                        name="region"
+                                        id="id_region"
+                                        data-source="{% url 'region_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name" required>
+                                    <option value="">---------</option>
+                                </select>
+                            </div>
+                            <div class="col s2">
+                                <button id='add-region-btn'
+                                        class="btn-add-margin-top btn-floating btn-small waves-effect waves-light green"
+                                        type="button"><i class="material-icons">add</i></button>
+                            </div>
+                            <div class="col s10">
+                                <label for="id_district">Район:</label>
+                                <select class="browser-default"
+                                        name="district"
+                                        id="id_district"
+                                        data-source="{% url 'district_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="name">
+                                    <option value="">---------</option>
+                                    <option value="">Не застосовується</option>
+
+                                </select>
+                            </div>
+                            <div class="col s2">
+                                <button id='add-district-btn'
+                                        class="btn-add-margin-top btn-floating btn-small waves-effect waves-light green"
+                                        type="button"><i class="material-icons">add</i></button>
+                            </div>
+                            <div class="col s10">
+                                <label for="id_type_locality">Категорія н.п.:</label>
+                                <select class="browser-default"
+                                        name="type_locality"
+                                        id="id_type_locality"
+                                        data-source="{% url 'type_locality_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="short" required>
+                                    <option value="" selected>---------</option>
+
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <label for="id_name">Назва населеного пункту:</label>
+                            <input type="text" name="name" maxlength="512"
+                                   required id="id_name">
+                        </div>
+
+                        <div class="row">
+                            <p class="center">
+                                <button class="green btn waves-effect waves-light" type="submit">
+                                    Зберегти
+                                </button>
+                            </p>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function () {
+
+            function getCountries() {
+                getValuesById('id_country');
+            }
+
+            function getRegions(params = {}) {
+                getValuesById('id_region', params);
+            }
+
+            function getDistrict(params = {}) {
+                getValuesById('id_district', params);
+
+                $('#id_district').append('<option value="">Не застосовується</option>')
+                ;
+            }
+
+            function getLocality(params = {}) {
+                getValuesById('id_locality', params);
+            }
+
+            function getTypeLocalities() {
+                getValuesById('id_type_locality');
+            }
+
+            function listenForCountryChange() {
+                $("#id_country").change(function () {
+                    getRegions({country_id: $(this).val()});
+                });
+            }
+
+            function listenForRegionChange() {
+                $("#id_region").change(function () {
+                    getDistrict({region_id: $(this).val()});
+                });
+            }
+
+            function listenForDistrictChange() {
+                $("#id_district").change(function () {
+                    if ($(this).val())
+                        getLocality({district_id: $(this).val(), region_id: $('#id_region').val()});
+                });
+            }
+
+            function listenForTLChange() {
+                $("#id_type_locality").change(function () {
+                    if ($(this).val())
+                        getLocality({
+                            district_id: $('#id_district').val(),
+                            region_id: $('#id_region').val(),
+                            type_locality_id: $(this).val()
+                        });
+                });
+            }
+
+
+
+            function listenForAddCountryBTN() {
+                $("#add-country-btn").click(function () {
+                    var new_window = PopupCenter({% url 'add_country' %}, 'Додати країну','height=400,width=800');
+                    var timer = setInterval(function() {
+                        if(new_window.closed) {
+                            getCountries();
+                            clearInterval(timer);
+                            }
+                    }, 1000);
+                });
+            }
+
+            function listenForAddRegionBTN() {
+                $("#add-region-btn").click(function () {
+                    var country_id =  $('#id_country').val();
+                    if (country_id) {
+                        var new_window = PopupCenter('/add-region/' + country_id, 'Додати область', 'height=400, width=800');
+                        var timer = setInterval(function() {
+                            if(new_window.closed) {
+                                getRegions({country_id: country_id});
+                                clearInterval(timer);
+                                }
+                        }, 1000);
+                    } else {
+                        alert("Виберіть країну!")
+                    }
+                });
+            }
+
+            function listenForAddDistrictBTN() {
+                $("#add-district-btn").click(function () {
+                    var region_id =  $('#id_region').val();
+                    if (region_id) {
+                        var new_window = PopupCenter('/add-district/' + region_id, 'Додати район', 'height=400, width=800');
+                        var timer = setInterval(function() {
+                            if(new_window.closed) {
+                                getDistrict({region_id: region_id});
+                                clearInterval(timer);
+                                }
+                        }, 1000);
+                    } else {
+                        alert("Виберіть область!")
+                    }
+                });
+            }
+
+            function initPage() {
+                listenNcapitalize('#id_name');
+
+                getCountries();
+                getTypeLocalities();
+
+                listenForCountryChange();
+                listenForRegionChange();
+                listenForDistrictChange();
+                listenForTLChange();
+
+                listenForAddCountryBTN();
+                listenForAddRegionBTN();
+                listenForAddDistrictBTN();
+            }
+
+            initPage();
+        });
+    </script>
+{% endblock %}

@@ -11,10 +11,10 @@
         <div class="nav-wrapper">
             <ul class="left">
                 <li><a id="close-or-back" href="javascript:"><i class="material-icons">arrow_back</i></a></li>
-                {#                        <li><a target="_blank" href="{% url "create_person" %}">Додати до списку<i#}
-                {#                                class="material-icons right">add</i></a></li>#}
             </ul>
             <ul class="right">
+                <li><a id="add-locality-nav-btn" target="_blank" href="javascript:">Додати наслений пункт<i
+                        class="material-icons right">add</i></a></li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url "logout" %}">Вийти - {{ request.user.username }}</a></li>
                 {% endif %}
@@ -37,137 +37,151 @@
     </div>
 {% endblock %}
 
- {% block script %}
-     <script>
-         $(document).ready(function () {
+{% block script %}
+    <script>
+        $(document).ready(function () {
 
-             function getBookNumbers() {
-                 getValuesById('id_book_number');
-             }
+            function getBookNumbers() {
+                getValuesById('id_book_number');
+            }
 
-             function getHostels() {
-                 getValuesById('id_hostel');
-             }
+            function getHostels() {
+                getValuesById('id_hostel');
+            }
 
-             function getPasportysts() {
-                 getValuesById('id_pasportyst');
-             }
+            function getPasportysts() {
+                getValuesById('id_pasportyst');
+            }
 
-             function getCountries() {
-                 getValuesById('id_country');
-             }
+            function getCountries() {
+                getValuesById('id_country');
+            }
 
-             function getRegions(params = {}) {
-                 getValuesById('id_region', params);
-             }
+            function getRegions(params = {}) {
+                getValuesById('id_region', params);
+            }
 
-             function getDistrict(params = {}) {
-                 getValuesById('id_district', params);
+            function getDistrict(params = {}) {
+                getValuesById('id_district', params);
 
-                 $('#id_district').append('<option value="-1">Не застосовується</option>')
-                 ;
-             }
+                $('#id_district').append('<option value="-1">Не застосовується</option>')
+                ;
+            }
 
-             function getLocality(params = {}) {
-                 getValuesById('id_locality', params);
-             }
+            function getLocality(params = {}) {
+                getValuesById('id_locality', params);
+            }
 
-             function getTypeLocalities() {
-                 getValuesById('id_type_locality');
-             }
+            function getTypeLocalities() {
+                getValuesById('id_type_locality');
+            }
 
-             function getBooks(params = {}) {
-                 getValuesById('id_book', params);
-             }
+            function getBooks(params = {}) {
+                getValuesById('id_book', params);
+            }
 
-             function listenForHostelChange() {
-                 $("#id_hostel").change(function () {
-                     getBooks({hostel_id: $(this).val()});
-                 });
-             }
+            function listenForHostelChange() {
+                $("#id_hostel").change(function () {
+                    getBooks({hostel_id: $(this).val()});
+                });
+            }
 
-             function listenForCountryChange() {
-                 $("#id_country").change(function () {
-                     getRegions({country_id: $(this).val()});
-                 });
-             }
+            function listenForCountryChange() {
+                $("#id_country").change(function () {
+                    getRegions({country_id: $(this).val()});
+                });
+            }
 
-             function listenForRegionChange() {
-                 $("#id_region").change(function () {
-                     getDistrict({region_id: $(this).val()});
-                 });
-             }
+            function listenForRegionChange() {
+                $("#id_region").change(function () {
+                    getDistrict({region_id: $(this).val()});
+                });
+            }
 
-             function listenForDistrictChange() {
-                 $("#id_district").change(function () {
-                     if ($(this).val())
+            function listenForDistrictChange() {
+                $("#id_district").change(function () {
+                    if ($(this).val())
                         getLocality({district_id: $(this).val(), region_id: $('#id_region').val()});
-                 });
-             }
+                });
+            }
 
-             function listenForTLChange() {
-                 $("#id_type_locality").change(function () {
-                     if ($(this).val())
-                        getLocality({district_id: $('#id_district').val(), region_id: $('#id_region').val(), type_locality_id: $(this).val()});
-                 });
-             }
+            function listenForTLChange() {
+                $("#id_type_locality").change(function () {
+                    if ($(this).val())
+                        getLocality({
+                            district_id: $('#id_district').val(),
+                            region_id: $('#id_region').val(),
+                            type_locality_id: $(this).val()
+                        });
+                });
+            }
 
-             function listenNcapitalize(field) {
-                 $(field).on('keyup', function () {
-                     $(this).capitalize();
-                 }).capitalize();
-             }
+            function listenForIdCard() {
 
-             function listenForIdCard() {
+                $('input[type=radio][name=id_passport]').change(function () {
+                    $input = $('#id_unique_number');
+                    if (this.value == '0') {
+                        $input.removeAttr('disabled');
+                        $($input.parent()).show();
+                    } else if (this.value == '1') {
+                        $input.attr('disabled', 'disabled');
+                        $input.val('');
+                        $($input.parent()).hide();
+                    }
+                });
+            }
 
-                 $('input[type=radio][name=id_passport]').change(function () {
-                     $input = $('#id_unique_number');
-                     if (this.value == '0') {
-                         $input.removeAttr('disabled');
-                         $($input.parent()).show();
-                     } else if (this.value == '1') {
-                         $input.attr('disabled', 'disabled');
-                         $input.val('');
-                         $($input.parent()).hide();
-                     }
-                 });
-             }
+            function listenForAddLocalityBTN() {
+                $("#add-locality-nav-btn").click(function () {
+                    var new_window = PopupCenter("{% url 'add_locality' %}", 'Додати населений пункт', 'height=400, width=800');
+                    var timer = setInterval(function () {
+                        if (new_window.closed) {
+                            if (confirm("Очистити поля для народження?"))
+                                getCountries();
 
-
-             function initPage() {
-                 {% if person.locality is None %}
-                     getCountries();
-                     getTypeLocalities();
-                 {% endif %}
-
-{#                 {% if not book_numbers %}#}
-{#                     getBookNumbers();#}
-{#                 {% endif %}#}
-{#                 {% if not hostels %}#}
-{#                     getHostels();#}
-{#                 {% endif %}#}
-{#                 {% if not pasportysts %}#}
-{#                     getPasportysts();#}
-{#                 {% endif %}#}
+                            clearInterval(timer);
+                        }
+                    }, 1000);
+                });
+            }
 
 
-                 listenForHostelChange();
-                 listenForCountryChange();
-                 listenForRegionChange();
-                 listenForDistrictChange();
-                 listenForTLChange();
-                 listenForIdCard();
+            function initPage() {
+                {% if person.locality is None %}
+                    getCountries();
+                    getTypeLocalities();
+                {% endif %}
+
+                {#                 {% if not book_numbers %}#}
+                {#                     getBookNumbers();#}
+                {#                 {% endif %}#}
+                {#                 {% if not hostels %}#}
+                {#                     getHostels();#}
+                {#                 {% endif %}#}
+                {#                 {% if not pasportysts %}#}
+                {#                     getPasportysts();#}
+                {#                 {% endif %}#}
 
 
+                listenForHostelChange();
+                listenForCountryChange();
+                listenForRegionChange();
+                listenForDistrictChange();
+                listenForTLChange();
+                listenForIdCard();
 
-                 listenNcapitalize('#id_name');
-                 listenNcapitalize('#id_surname');
-                 listenNcapitalize('#id_patronymic');
 
+                listenNcapitalize('#id_name');
+                listenNcapitalize('#id_surname');
+                listenNcapitalize('#id_patronymic');
 
-             }
+                listenFormSubmit('#person_form_id');
 
-             initPage();
-         });
-     </script>
- {% endblock %}
+                listenForAddLocalityBTN();
+
+            }
+
+            initPage();
+        });
+    </script>
+{% endblock %}

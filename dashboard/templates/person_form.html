@@ -1,4 +1,4 @@
-<form method="POST">
+<form method="POST" id="person_form_id">
     {% csrf_token %}
 
     <!-- Surname | Name | Patronymic -->
@@ -158,7 +158,7 @@
             <label for="id_hostel">Гуртожиток:</label>
             <select class="browser-default"
                     name="hostel"
-                    id="id_hostel"
+                    id="id_hostel" required
                     data-source="{% url 'hostel_api' %}"
                     data-valueKey="id"
                     data-displayKey="number">
@@ -175,7 +175,7 @@
             <label for="id_book">Книга:</label>
             <select class="browser-default"
                     name="book"
-                    id="id_book"
+                    id="id_book" required
                     data-source="{% url 'book_api' %}"
                     data-valueKey="id"
                     data-displayKey="number">
@@ -274,7 +274,7 @@
                     required>
                 <option value="" selected>---------</option>
                 {% for tl in type_localities  %}
-                    <option value="{{ tl.id }}" {% if tl.id == person.locality.l_type_id %}selected{% endif %}>{{ tl.short }}</option>
+                    <option value="{{ tl.id }}" {% if tl.id == person.locality.type_locality_id %}selected{% endif %}>{{ tl.short }}</option>
                 {% endfor %}
             </select>
         </div>

@@ -117,16 +117,16 @@ def populate_locs():
 
         region, _ = Region.objects.get_or_create(country_id=country.id, name=region_name)
 
-        l_type, _ = TypeLocality.objects.get_or_create(name=type_locality_name)
+        type_locality, _ = TypeLocality.objects.get_or_create(name=type_locality_name)
 
         if district_name:
             district, _ = District.objects.get_or_create(name=district_name, region_id=region.id)
             Locality.objects.update_or_create(name=locality_name,
                                               region_id=region.id,
-                                              l_type=l_type,
+                                              type_locality=type_locality,
                                               district_id=district.id)
         else:
-            Locality.objects.update_or_create(name=locality_name, region_id=region.id, l_type=l_type)
+            Locality.objects.update_or_create(name=locality_name, region_id=region.id, type_locality=type_locality)
 
 
 def populate_db():

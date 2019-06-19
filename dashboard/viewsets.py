@@ -46,7 +46,7 @@ class ListLocalityView(ListAPIView):
             else:
                 queryset = queryset.filter(district_id=district_id)
         if type_locality_id is not None:
-            queryset = queryset.filter(l_type_id=type_locality_id)
+            queryset = queryset.filter(type_locality_id=type_locality_id)
 
         return queryset.order_by('name')
 

@@ -28,7 +28,7 @@ class LocalitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Locality
-        fields = ['id', 'name', 'l_type', 'district_id', 'region_id']
+        fields = ['id', 'name', 'type_locality', 'district_id', 'region_id']
 
 
 class TypeLocalitySerializer(serializers.ModelSerializer):

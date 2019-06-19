@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import dashboard_view, logout_view, login_view, pdb_test_view, person_view, create_person_view, \
-    edit_person_view, delete_person_view, restore_person_view
+    edit_person_view, delete_person_view, restore_person_view, add_country, add_region, add_district, add_locality
 from .viewsets import ListCountryView, ListDistrictView, ListLocalityView, ListRegionView, ListBookNumberView, \
     ListHostelView, ListPasportystView, ListTypeLocalityView
 
@@ -19,6 +19,11 @@ urlpatterns = [
     # auth
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name="logout"),
+    # add locality
+    path('add-country/', add_country, name="add_country"),
+    path('add-region/<int:country_id>', add_region, name="add_region"),
+    path('add-district/<int:region_id>', add_district, name="add_district"),
+    path('add-locality/', add_locality, name="add_locality"),
     # api
     path('country/', ListCountryView.as_view(), name="country_api"),
     path('region/', ListRegionView.as_view(), name="region_api"),
