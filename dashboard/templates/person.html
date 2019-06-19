@@ -2,17 +2,31 @@
 
 
 {% block title %}
-    Запис: #{{ person.id }}| №{{ person.number_in_book }} в книзі {{ person.book_number }} | Студмістечко
+    {{ person.short_name }}, г. №{{ person.hostel.number }} | Студмістечко
 {% endblock %}
 
 
 {% block content %}
+    <nav class="dashboard-nav">
+        <div class="nav-wrapper">
+            <ul class="left">
+                <li><a href="javascript: window.close();"><i class="material-icons">arrow_back</i></a></li>
+                {#                        <li><a target="_blank" href="{% url "create_person" %}">Додати до списку<i#}
+                {#                                class="material-icons right">add</i></a></li>#}
+            </ul>
+            <ul class="right">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url "logout" %}">Вийти - {{ request.user.username }}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
     <div class="container">
         <div class="row">
 
             <div class="col s12">
                 <div class="card-panel">
-                    <h4 class="center">Запис: <b>#{{ person.id }}</b> | <b>№{{ person.number_in_book }}</b> в книзі
+                    <h4 class="center">Запис: <b>#{{ person.id }}</b></b> в книзі
                         <b>{{ person.book_number }}</b></h4>
 
                     <div class="row">
@@ -58,12 +72,12 @@
                                 {{ person.date_of_issue|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
                         <div class="col l6 s12">
-                            <h6 class=""><b>Дата реєстрації: </b>{% if person.registered_date %}
-                                {{ person.registered_date|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                            <h6 class=""><b>Дата реєстрації: </b>{% if person.registered %}
+                                {{ person.registered|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
                         <div class="col l6 s12">
-                            <h6 class=""><b>Дата виписки: </b>{% if person.de_registered_date %}
-                                {{ person.de_registered_date|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                            <h6 class=""><b>Дата зняття з реєс.: </b>{% if person.de_registered %}
+                                {{ person.de_registered|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
                         <div class="col s12">
                             <h6 class=""><b>Куди зареєст.: </b>{% if person.new_address %}
@@ -146,11 +160,23 @@
                         <div class="row">
                             <div class="col s12">
                                 <p class="center">
-                                    <a class="waves-effect waves-light btn red accent-2"
-                                       href="{% url 'delete_person' pk=person.pk %}">Видалити</a>
+                                    <button class="delete-person-btn waves-effect waves-light btn red accent-2"
+                                       data-id="{{ person.id }}">Видалити</button>
                                 </p>
                             </div>
                         </div>
+                    {% else %}
+                        {% if request.user.is_staff %}
+                            <hr>
+                            <div class="row">
+                                <div class="col s12">
+                                    <p class="center">
+                                        <button class="restore-person-btn waves-effect waves-light btn red accent-2"
+                                           data-id="{{ person.id }}">Відновити</button>
+                                    </p>
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endif %}
 
                 </div>
@@ -162,7 +188,7 @@
 {% block script %}
     <script>
         $(document).ready(function () {
-            function f() {
+            function markEditedFields() {
                 var i = 0;
                 var $prev;
                 $('tr').each(function () {
@@ -183,8 +209,27 @@
                     $prev = this;
                 })
             }
+            function listeForPeronDelete() {
+                $('.delete-person-btn ').click(function () {
+                    var r = window.confirm('Справді видалити {{ person.short_name }}?');
+                    if (r){
+                        window.location.href = "{% url 'delete_person' pk=person.pk %}"
+                    }
+                })
+            }
+            function listeForPeronRestore() {
+                $('.restore-person-btn ').click(function () {
+                    var r = window.confirm('Справді відновити {{ person.short_name }}?');
+                    if (r) {
+                        window.location.href = "{% url 'restore_person' pk=person.pk %}"
+                    }
+                })
+            }
 
-            f();
+            markEditedFields();
+            listeForPeronDelete();
+            listeForPeronRestore();
+
         });
     </script>
 {% endblock %}

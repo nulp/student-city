@@ -4,16 +4,17 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http40
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils import timezone
 from django.contrib import messages
 from django.db.models import Q
-from .models import Person, Locality, BookNumber, Hostel, Pasportyst, Country, Region, District, TypeLocality, \
-    PersonHistory
+from .models import Person, Locality, Hostel, Pasportyst, Country, Region, District, TypeLocality, \
+    PersonHistory, Book
 from .forms import PersonForm
 from .serializers import PersonTableSerializer
 
 from .utils import populate_db, get_default_person_order, get_ukrainian_person_field_names, \
     str2date, get_url_without_param, date_delta_years
-import datetime
 import json
 
 import operator
@@ -21,8 +22,10 @@ from functools import reduce
 
 
 def pdb_test_view(request):
+    import time
+    start = time.time()
     populate_db()
-    return HttpResponse("All done!")
+    return HttpResponse(f"All done in {(time.time() - start)/60}")
 
 
 @login_required
@@ -31,7 +34,7 @@ def person_view(request, pk):
     history = PersonHistory.objects.filter(person_id=person.id)
     table_fields = ['surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
                      'passport_authority',
-                     'date_of_issue', 'registered_date', 'de_registered_date', 'new_address', 'book_number', 'number_in_book',
+                     'date_of_issue', 'registered', 'de_registered', 'new_address', 'book_number',
                      'pasportyst',
                      'locality', 'hostel', 'room', 'created', 'updated', 'note']
 
@@ -64,20 +67,22 @@ def delete_person_view(request, pk):
     return redirect('show_person', pk=pk)
 
 
+@staff_member_required
+def restore_person_view(request, pk):
+    person = get_object_or_404(Person, pk=pk)
+
+    person.deleted = False
+    person.deleted_by_id = None
+    person.save()
+
+    return redirect('show_person', pk=pk)
+
+
 # @login_required
 # def person_history_view(request, pk):
 #     person = get_object_or_404(Person, pk=pk)
 #     return render(request, template_name='person.html', context={'person': person})
 
-
-@login_required
-def save_sidebar_view(request):
-    if request.session.get('show_sidebar', False):
-        request.session['show_sidebar'] = False
-    else:
-        request.session['show_sidebar'] = True
-
-    return JsonResponse({'show': request.session['show_sidebar']})
 
 
 @login_required
@@ -118,7 +123,7 @@ def edit_person_view(request, pk):
 
     ctx = {
         'person': person,
-        'book_numbers': BookNumber.objects.all(),
+        'book_numbers': Book.objects.all(),
         'pasportysts': Pasportyst.objects.all(),
         'hostels': Hostel.objects.all(),
         'countries': Country.objects.all(),
@@ -168,7 +173,7 @@ def create_person_view(request):
 
     ctx = {
         'person': person,
-        'book_numbers': BookNumber.objects.all(),
+        'book_numbers': Book.objects.all(),
         'pasportysts': Pasportyst.objects.all(),
         'hostels': Hostel.objects.all(),
         'countries': Country.objects.all(),
@@ -177,11 +182,39 @@ def create_person_view(request):
         'type_localities': TypeLocality.objects.all(),
         'localities': localities,
     }
+
     return render(request, template_name='person_create.html', context=ctx)
+
+
+from io import BytesIO
+import xlsxwriter
+
+
+def write_to_excel(body, head):
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+
+    worksheet = workbook.add_worksheet()
+
+    for c, col in enumerate(head):
+        worksheet.write(0, c, col)
+
+    n = len(head)
+    for r, row in enumerate(body):
+        row = row[:n]
+        for c, col in enumerate(row):
+            worksheet.write(r + 1, c, col)
+
+    workbook.close()
+    xlsx_data = output.getvalue()
+    return xlsx_data
 
 
 @login_required
 def dashboard_view(request):
+
+    _today = timezone.localtime(timezone.now())
+
     request.GET = request.GET.copy()
 
     table_fields = request.session.get('table_fields', get_default_person_order())
@@ -209,17 +242,35 @@ def dashboard_view(request):
         except ValueError:
             pass
 
+    # pasportyst_id from request
+    pasportyst_id = request.GET.get('pasportyst')
+    if pasportyst_id:
+        try:
+            pasportyst_id = int(pasportyst_id)
+            if pasportyst_id != -1:
+                person_filters.append(Q(pasportyst_id=pasportyst_id))
+        except ValueError:
+            pass
+
     # surname from request
     surname = request.GET.get('surname')
     if surname:
         if surname.strip():
             surname = surname.strip()
             surname = surname.capitalize()
-            person_filters.append(Q(surname=surname))
+            person_filters.append(Q(surname__icontains=surname) | Q(name__icontains=surname))
         else:
             request.GET.pop('surname')
 
-            # localized_str2date()
+    # note from request
+    note = request.GET.get('note')
+    if note:
+        if note.strip():
+            note = note.strip()
+            note = note.capitalize()
+            person_filters.append(Q(note__icontains=note))
+        else:
+            request.GET.pop('note')
 
     # filter by birthday from request
     if request.GET.get('birth_check'):
@@ -239,7 +290,40 @@ def dashboard_view(request):
             str2date(start_date)
             end_date = request.GET.get('reg_end')
             str2date(end_date)
-            person_filters.append(Q(registered_date__range=[start_date, end_date]))
+            person_filters.append(Q(registered__range=[start_date, end_date]))
+        except:
+            pass
+
+    # filter by registration period from request
+    if request.GET.get('reg_per_check'):
+        try:
+            start_date = request.GET.get('reg_per_start')
+            str2date(start_date)
+            end_date = request.GET.get('reg_per_end')
+            str2date(end_date)
+            person_filters.append(Q(registered_period__range=[start_date, end_date]))
+        except:
+            pass
+
+    # filter by continued from request
+    if request.GET.get('cont_check'):
+        try:
+            start_date = request.GET.get('cont_start')
+            str2date(start_date)
+            end_date = request.GET.get('cont_end')
+            str2date(end_date)
+            person_filters.append(Q(continued__range=[start_date, end_date]))
+        except:
+            pass
+
+    # filter by continued period from request
+    if request.GET.get('cont_per_check'):
+        try:
+            start_date = request.GET.get('cont_per_start')
+            str2date(start_date)
+            end_date = request.GET.get('cont_per_end')
+            str2date(end_date)
+            person_filters.append(Q(continued_period__range=[start_date, end_date]))
         except:
             pass
 
@@ -250,7 +334,7 @@ def dashboard_view(request):
             str2date(start_date)
             end_date = request.GET.get('de_reg_end')
             str2date(end_date)
-            person_filters.append(Q(de_registered_date__range=[start_date, end_date]))
+            person_filters.append(Q(de_registered__range=[start_date, end_date]))
         except:
             pass
 
@@ -272,17 +356,24 @@ def dashboard_view(request):
     # filter by de_registration (if address is present) from request
     registered = request.GET.get('registered', '0')
     if registered == '0':
-        person_filters.append(Q(new_address__exact=''))
-        person_filters.append(Q(new_address__isnull=False))
+        person_filters.append(Q(de_registered__isnull=True))
+    elif registered == '1':
+        person_filters.append(Q(de_registered__isnull=False))
+
+    expired = request.GET.get('expired', '0')
+    if expired == '1':
+        _temp_a = Q(de_registered__isnull=True) & Q(continued__isnull=True) & Q(registered_period__isnull=False) & Q(registered_period__lt=_today)
+        _temp_b = (Q(de_registered__isnull=True) & Q(continued__isnull=False) & Q(continued_period__isnull=False) & Q(continued_period__lt=_today))
+        person_filters.append(_temp_a | _temp_b)
 
     # get ordering from request and convert into list of params
     ordering = request.GET.get('ordering', '0')
     if ordering == '1':
         ordering = ['hostel_id', 'pasportyst_id', 'surname', 'name', 'patronymic']
     elif ordering == '2':
-        ordering = ['hostel_id', 'registered_date', 'surname', 'name', 'patronymic']
+        ordering = ['hostel_id', 'registered', 'surname', 'name', 'patronymic']
     elif ordering == '3':
-        ordering = ['hostel_id', 'de_registered_date', 'surname', 'name', 'patronymic']
+        ordering = ['hostel_id', 'de_registered', 'surname', 'name', 'patronymic']
     else:
         ordering = ['hostel_id', 'surname', 'name', 'patronymic']
 
@@ -301,21 +392,22 @@ def dashboard_view(request):
     else:
         persons = persons.order_by(*ordering)
 
-    if registered == '1':
-        persons = persons.exclude(Q(new_address__isnull=True) | Q(new_address__exact=''))
-
     # results count
     person_count = persons.count()
 
     # pagination
-    paginator = Paginator(persons, 100)
+    PER_PAGE = 100
+    if 'excel' in request.GET:
+        PER_PAGE = 1000000
+
+    paginator = Paginator(persons, PER_PAGE)
     page = request.GET.get('page')
     persons_paginator = paginator.get_page(page)
 
     # serialization of person
     persons = [p for p in persons_paginator]
     for i, p in enumerate(persons):
-        row = []
+        row = [PER_PAGE * (persons_paginator.number - 1) + i + 1]
         pd = PersonTableSerializer(p).data
         for f in table_fields:
 
@@ -330,21 +422,33 @@ def dashboard_view(request):
 
     # additional context data
     ukr_names = get_ukrainian_person_field_names()
-    book_numbers = BookNumber.objects.all()
     hostels = Hostel.objects.all()
+    book_numbers = Book.objects.all()
+    if isinstance(hostel_id, int) and hostel_id != -1:
+        book_numbers = book_numbers.filter(hostel_id=hostel_id)
+
+    pasportysts = Pasportyst.objects.all()
     path_without_page = get_url_without_param(request.get_full_path())
+
+    if 'excel' in request.GET:
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename={_today.strftime("%d.%m.%Y - %H.%M.%S")}.xlsx'
+        xlsx_data = write_to_excel(persons, [ukr_names[x] for x in ['id'] + table_fields])
+        response.write(xlsx_data)
+        return response
 
     ctx = {
         'persons': persons,
         'persons_paginator': persons_paginator,
         'persons_count': person_count,
-        'table_fields': [ukr_names[x] for x in table_fields],
+        'table_fields': [ukr_names[x] for x in ['id'] + table_fields],
         'book_numbers': book_numbers,
+        'pasportysts': pasportysts,
         'hostels': hostels,
         'path_without_page': path_without_page,
 
     }
-    return render(request=request, template_name="dashboard.html", context=ctx)
+    return render(request=request, template_name="dashboard_bottom.html", context=ctx)
 
 
 def logout_view(request):

@@ -77,10 +77,8 @@ class Hostel(models.Model):
 
 
 class Pasportyst(models.Model):
-    # user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=256)
     active = models.BooleanField(default=True)
-    # editor = models.BooleanField(default=False)
     created = models.DateField(auto_now_add=True)
     updated = models.DateField(auto_now=True)
 
@@ -88,25 +86,17 @@ class Pasportyst(models.Model):
         return self.name
 
 
-class BookNumber(models.Model):
-    number = models.CharField(max_length=16)
-
-    def __str__(self):
-        return self.number
-
-
 class Book(models.Model):
-    book_number = models.ForeignKey(BookNumber, on_delete=models.SET_NULL, null=True)
-    pasportyst = models.ForeignKey(Pasportyst, on_delete=models.SET_NULL, null=True)
+    number = models.CharField(max_length=64)
     hostel = models.ForeignKey(Hostel, on_delete=models.SET_NULL, null=True)
+    
     note = models.TextField()
 
-    @property
-    def number(self):
-        return self.book_number.number
-
     def __str__(self):
-        return str(self.book_number) + ' ' + str(self.pasportyst) + ' ' + str(self.hostel)
+        return '(г. №' + self.hostel.number + ') ' + str(self.number)
+
+    class Meta:
+        ordering = ['hostel_id', 'number']
 
 
 class PersonQuerySet(models.QuerySet):
@@ -139,18 +129,6 @@ class PersonManager(models.Manager):
 
 class Person(models.Model):
 
-    def n_in_b(self):
-
-        no = \
-            Person.objects.filter(book__book_number_id=self.book.book_number_id).aggregate(
-                models.Max('number_in_book'))[
-                'number_in_book__max']
-
-        if no is None:
-            return 1
-        else:
-            return no + 1
-
     name = models.CharField(db_index=True, max_length=128)
     surname = models.CharField(db_index=True, max_length=128,)
     patronymic = models.CharField(db_index=True, max_length=128, blank=True, default="")
@@ -162,12 +140,16 @@ class Person(models.Model):
     passport_authority = models.CharField(max_length=128, blank=False, null=True)
     date_of_issue = models.DateField(blank=False, null=True)
 
-    registered_date = models.DateField(db_index=True, null=True)
-    de_registered_date = models.DateField(db_index=True, null=True, blank=True)
+    registered = models.DateField(db_index=True, null=True)
+    registered_period = models.DateField(db_index=True, null=True, blank=True)
+    continued = models.DateField(db_index=True, null=True, blank=True)
+    continued_period = models.DateField(db_index=True, null=True, blank=True)
+    de_registered = models.DateField(db_index=True, null=True, blank=True)
+
+    old_address = models.CharField(max_length=256, default='', null=True, blank=True)
     new_address = models.CharField(max_length=256, default='', null=True, blank=True)
 
     book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
-    number_in_book = models.IntegerField(default=0, blank=True)
     pasportyst = models.ForeignKey(Pasportyst, on_delete=models.SET_NULL, null=True)
 
     locality = models.ForeignKey(Locality, on_delete=models.SET_NULL, null=True)
@@ -184,7 +166,9 @@ class Person(models.Model):
 
     deleted = models.BooleanField(default=False)
     deleted_time = models.DateTimeField(auto_now=True, blank=True)
-    deleted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # sex = models.CharField(max_length=1, default="Ч")
 
     note = models.TextField(blank=True)
 
@@ -193,7 +177,19 @@ class Person(models.Model):
 
     @property
     def book_number(self):
-        return self.book.book_number
+        if self.book:
+            return self.book.number
+        else:
+            return None
+
+
+    @property
+    def short_name(self):
+        p = ''
+        if self.patronymic:
+            p = ' ' + self.patronymic[0] + '. '
+        return f"{self.surname} {self.name[0]}.{p}"
+
 
     def __str__(self):
         return self.name + ' ' + self.surname

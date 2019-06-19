@@ -1,0 +1,312 @@
+<form method="POST">
+    {% csrf_token %}
+
+    <!-- Surname | Name | Patronymic -->
+    <div class="row">
+        <div class="col s4">
+            <label for="id_surname">Прізвище:</label>
+            <input type="text" name="surname" maxlength="128"
+                   required id="id_surname" value="{{ person.surname }}">
+        </div>
+        <div class="col s4">
+            <label for="id_name">Ім'я:</label>
+            <input type="text" name="name" maxlength="128" required
+                   id="id_name" value="{{ person.name }}">
+        </div>
+        <div class="col s4">
+            <label for="id_patronymic">Побатькові:</label>
+            <input type="text" name="patronymic"
+                   maxlength="128" id="id_patronymic" value="{{ person.patronymic }}">
+        </div>
+    </div>
+
+    <!-- Birthday | unique number -->
+    <div class="row">
+        <div class="col s4">
+            <label for="id_birthday">Дата народження:</label>
+            <input type="date" name="birthday" id="id_birthday" required
+                   value="{% if person.birthday %}{{ person.birthday|date:"Y-m-d" }}{% endif %}"
+                   min="1900-01-01" max="{% now "Y-m-d" %}">
+        </div>
+        <div class="col s4">
+            <div class="row no-margin-bottom" style="margin-top: 20px;">
+                <div class="col s6">
+
+                <label>
+                    <input class="with-gap" name="id_passport" value="0" type="radio"
+                           {% if not person or person.unique_number  %}checked{% endif %}/>
+                    <span>ID-картка</span>
+                </label>
+                </div>
+
+                <div class="col s4">
+                    <label>
+                        <input class="with-gap" name="id_passport" value="1" type="radio"
+                               {% if person and not person.unique_number %}checked{% endif %}/>
+                        <span>Паспорт</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="col s4">
+            <label for="id_unique_number">Унікальний номер:</label>
+            <input type="text" {% if person and not person.unique_number %}disabled{% endif %}
+                   value="{% if person.unique_number %}{{ person.unique_number }}{% endif %}"
+                   name="unique_number"
+                   maxlength="100"
+                   id="id_unique_number">
+        </div>
+    </div>
+
+    <!-- passport_number | passport_authority | date_of_issue -->
+    <div class="row">
+        <div class="col s4">
+            <label for="id_passport_number">Номер паспорта:</label>
+            <input type="text"
+                   value="{% if person.passport_number %}{{ person.passport_number }}{% endif %}"
+                   name="passport_number"
+                   maxlength="32" required
+                   id="id_passport_number">
+        </div>
+        <div class="col s4">
+            <label for="id_passport_authority">Орган видачі паспорта:</label>
+            <input type="text"
+                   value="{% if person.passport_authority %}{{ person.passport_authority }}{% endif %}"
+                   name="passport_authority"
+                   maxlength="128"
+                   required
+                   id="id_passport_authority">
+        </div>
+        <div class="col s4">
+            <label for="id_date_of_issue">Дата видачі:</label>
+            <input type="date" name="date_of_issue" required id="id_date_of_issue"
+                   value="{% if person.date_of_issue %}{{ person.date_of_issue|date:"Y-m-d"  }}{% endif %}"
+                   min="1900-01-01" max="{% now "Y-m-d" %}">
+        </div>
+    </div>
+
+    <!-- Registered | Period -->
+    <div class="row">
+        <div class="col s3">
+            <label for="id_registered">Дата реєстрації:</label>
+            <input type="date"
+                   value="{% if person.registered %}{{ person.registered|date:"Y-m-d" }}{% endif %}"
+                   name="registered"
+                   required
+                   id="id_registered">
+        </div>
+
+        <div class="col s3">
+            <label for="id_registered_period">Термін реєстрації:</label>
+            <input type="date"
+                   value="{% if person.registered_period %}{{ person.registered_period|date:"Y-m-d" }}{% endif %}"
+                   name="registered_period"
+                   id="id_registered_period">
+        </div>
+
+        <div class="col s3">
+            <label for="id_continued">Дата продовження:</label>
+            <input type="date"
+                   value="{% if person.continued %}{{ person.continued|date:"Y-m-d" }}{% endif %}"
+                   name="continued"
+                   id="id_continued">
+        </div>
+
+        <div class="col s3">
+            <label for="id_continued_period">Термін продовження:</label>
+            <input type="date"
+                   value="{% if person.continued_period %}{{ person.continued_period|date:"Y-m-d" }}{% endif %}"
+                   name="continued_period"
+                   id="id_continued_period">
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col s4">
+            <label for="id_old_address">Звідки прибув:</label>
+            <input type="text" name="old_address"
+                   value="{% if person.old_address %}{{ person.old_address }}{% endif %}"
+                   maxlength="256"
+                   placeholder="(Місто, Р-н, Вул, будинок, квартира)"
+                   id="id_old_address">
+        </div>
+
+        <div class="col s4">
+            <label for="id_de_registered">Дата зняття з реєс.:</label>
+            <input type="date"
+                   value="{% if person.de_registered %}{{ person.de_registered|date:"Y-m-d" }}{% endif %}"
+                   name="de_registered"
+                   id="id_de_registered">
+        </div>
+        <div class="col s4">
+            <label for="id_new_address">Куди зареєтрований:</label>
+            <input type="text" name="new_address"
+                   value="{% if person.new_address %}{{ person.new_address }}{% endif %}"
+                   maxlength="256"
+                   placeholder="(Місто, Р-н, Вул, будинок, квартира)"
+                   id="id_new_address">
+        </div>
+    </div>
+
+
+
+    <!-- Book | Pasportyst -->
+    <div class="row no-margin-bottom">
+
+        <div class="col s3">
+            <label for="id_hostel">Гуртожиток:</label>
+            <select class="browser-default"
+                    name="hostel"
+                    id="id_hostel"
+                    data-source="{% url 'hostel_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="number">
+
+                <option value="">---------</option>
+                {% for hostel in hostels  %}
+                    <option value="{{ hostel.id }}" {% if hostel.id == person.hostel.id %}selected{% endif %}>{{ hostel.number }}</option>
+                {% endfor %}
+            </select>
+
+        </div>
+        <div class="col s3">
+
+            <label for="id_book">Книга:</label>
+            <select class="browser-default"
+                    name="book"
+                    id="id_book"
+                    data-source="{% url 'book_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="number">
+
+                <option value="" selected>---------</option>
+                {% for book in book_numbers  %}
+                    <option value="{{ book.id }}" {% if book.id == person.book.id %}selected{% endif %}>{{ book.number }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col s3">
+            <label for="id_room">Кімната:</label>
+            <input type="text" name="room" maxlength="32"
+                   value="{% if person.room is not None %}{{ person.room }}{% endif %}"
+                   id="id_room">
+        </div>
+
+
+        <div class="col s3">
+            <label for="id_pasportyst">Паспортист:</label>
+            <select class="browser-default"
+                    name="pasportyst" required
+                    id="id_pasportyst"
+                    data-source="{% url 'pasportyst_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="name">
+                <option value="" selected>---------</option>
+                {% for p in pasportysts  %}
+                    <option value="{{ p.id }}" {% if p.id == person.pasportyst.id %}selected{% endif %}>{{ p.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <p class=""><b>Місце народження:</b></p>
+    <!-- Locality -->
+    <div class="row">
+        <div class="col s6">
+            <label for="id_country">Країна:</label>
+            <select class="browser-default"
+                    name="country"
+                    id="id_country"
+                    data-source="{% url 'country_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="name"
+                    required>
+                <option value="" selected>---------</option>
+                {% for country in countries  %}
+                    <option value="{{ country.id }}" {% if country.id == person.locality.region.country_id %}selected{% endif %}>{{ country.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col s6">
+            <label for="id_region">Область:</label>
+            <select class="browser-default"
+                    name="region"
+                    id="id_region"
+                    data-source="{% url 'region_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="name">
+                <option value="">---------</option>
+                {% for region in regions  %}
+                    <option value="{{ region.id }}" {% if region.id == person.locality.region_id %}selected{% endif %}>{{ region.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col s4">
+            <label for="id_district">Район:</label>
+            <select class="browser-default"
+                    name="district"
+                    id="id_district"
+                    data-source="{% url 'district_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="name"
+                    required>
+                <option value="">---------</option>
+                {% if person.locality and person.locality.district is None %}
+                    <option value="-1" selected>Не застосовується</option>
+                {% else %}
+                    <option value="-1" >Не застосовується</option>
+                {% endif %}
+                {% for district in districts  %}
+                    <option value="{{ district.id }}" {% if district.id == person.locality.district_id %}selected{% endif %}>{{ district.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col s4">
+            <label for="id_type_locality">Категорія н.п.:</label>
+            <select class="browser-default"
+                    name="type_locality"
+                    id="id_type_locality"
+                    data-source="{% url 'type_locality_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="short"
+                    required>
+                <option value="" selected>---------</option>
+                {% for tl in type_localities  %}
+                    <option value="{{ tl.id }}" {% if tl.id == person.locality.l_type_id %}selected{% endif %}>{{ tl.short }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col s4">
+            <label for="id_locality">Нас. пункт:</label>
+            <select class="browser-default"
+                    name="locality"
+                    id="id_locality"
+                    data-source="{% url 'locality_api' %}"
+                    data-valueKey="id"
+                    data-displayKey="name"
+                    required>
+                <option value="" selected>---------</option>
+                {% for l in localities  %}
+                    <option value="{{ l.id }}" {% if l.id == person.locality.id %}selected{% endif %}>{{ l.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Hostel | Room -->
+    <div class="row no-margin-bottom">
+
+    </div>
+
+    <p>
+        <label for="id_note">Примітка:</label>
+        <textarea name="note" cols="40" rows="10" id="id_note">{% if person.note %}{{ person.note }}{% endif %}</textarea>
+    </p>
+    <p class="center">
+        <button class="green btn waves-effect waves-light" type="submit">
+            Зберегти
+        </button>
+    </p>
+</form>

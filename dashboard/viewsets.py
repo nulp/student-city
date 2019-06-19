@@ -1,7 +1,7 @@
 from rest_framework.generics import ListAPIView
 from .serializers import CountrySerializer, RegionSerializer, DistrictSerializer, LocalitySerializer, \
     TypeLocalitySerializer, HostelSerializer, BookNumberSerializer, PasportystSerializer
-from .models import Country, Region, District, Locality, TypeLocality, BookNumber, Hostel, Pasportyst
+from .models import Country, Region, District, Locality, TypeLocality, Hostel, Pasportyst, Book
 
 
 class ListCountryView(ListAPIView):
@@ -66,7 +66,13 @@ class ListHostelView(ListAPIView):
 
 
 class ListBookNumberView(ListAPIView):
-    queryset = BookNumber.objects.all().order_by('-pk')
+
+    def get_queryset(self):
+        queryset = Book.objects.all()
+        hostel_id = self.request.query_params.get('hostel_id', None)
+        if hostel_id is not None:
+            queryset = queryset.filter(hostel_id=hostel_id)
+        return queryset
 
     serializer_class = BookNumberSerializer
 

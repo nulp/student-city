@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Person, Country, Region, District, Locality, TypeLocality, Hostel, BookNumber, Pasportyst
+from .models import Person, Country, Region, District, Locality, TypeLocality, Hostel, Pasportyst
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -68,13 +68,24 @@ class PersonTableSerializer(serializers.ModelSerializer):
     room = serializers.SerializerMethodField()
     pasportyst = serializers.SerializerMethodField()
 
+    birthday = serializers.SerializerMethodField()
+    date_of_issue = serializers.SerializerMethodField()
+    registered = serializers.SerializerMethodField()
+    registered_period = serializers.SerializerMethodField()
+    continued = serializers.SerializerMethodField()
+    continued_period = serializers.SerializerMethodField()
+    de_registered = serializers.SerializerMethodField()
+    created = serializers.SerializerMethodField()
+    updated = serializers.SerializerMethodField()
+
     class Meta:
         model = Person
         fields = ('pasportyst', 'book_number',
                   'locality', 'hostel', 'room',
                   'id', 'name', 'surname', 'patronymic', 'birthday', 'unique_number', 'passport_number',
                   'passport_authority',
-                  'date_of_issue', 'registered_date', 'de_registered_date', 'new_address', 'number_in_book',
+                  'date_of_issue', 'registered', 'registered_period', 'continued', 'continued_period', 'de_registered',
+                  'new_address', 'old_address',
                   'created', 'updated', 'note')
 
     def get_locality(self, obj):
@@ -82,11 +93,58 @@ class PersonTableSerializer(serializers.ModelSerializer):
             return obj.locality.full_locality
         return '-'
 
+    def get_birthday(self, obj):
+        if obj.birthday:
+            return obj.birthday.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_date_of_issue(self, obj):
+        if obj.date_of_issue:
+            return obj.date_of_issue.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_registered(self, obj):
+        if obj.registered:
+            return obj.registered.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_registered_period(self, obj):
+        if obj.registered_period:
+            return obj.registered_period.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_continued(self, obj):
+        if obj.continued:
+            return obj.continued.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_continued_period(self, obj):
+        if obj.continued_period:
+            return obj.continued_period.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_de_registered(self, obj):
+        if obj.de_registered:
+            return obj.de_registered.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_created(self, obj):
+        if obj.created:
+            return obj.created.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_updated(self, obj):
+        if obj.updated:
+            return obj.updated.strftime('%d.%m.%Y')
+        return '-'
+
     def get_hostel(self, obj):
         return obj.hostel.number
 
     def get_book_number(self, obj):
-        return obj.book_number.number
+        if obj.book_number:
+            return obj.book_number
+        return None
 
     def get_room(self, obj):
         return obj.room

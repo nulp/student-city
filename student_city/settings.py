@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import socket
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,12 +26,33 @@ SECRET_KEY = 'random'
 # DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '0.0.0.0', '192.168.0.76']
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+
+    print(f"""
+    
+    Сайт доступний за адресом: {IP}:8000
+    
+    """)
+    return IP
+
+
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1'] + [get_ip()]
 
 # Application definition
 
 INSTALLED_APPS = [
     'django_extensions',
+    'django.contrib.postgres',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,8 +65,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # 'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -76,20 +98,33 @@ WSGI_APPLICATION = 'student_city.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'USER': '',  # Not used with sqlite3.
-        'PASSWORD': '',  # Not used with sqlite3.
-        'HOST': '',  # Not used with sqlite3.
-        'PORT': '',  # Not used with sqlite3.
-        # for sqlite write lock timeout
-        'OPTIONS': {
-            'timeout': 10000,
-        }
-    },
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'scity',
+        'USER': 'scuser',
+        'PASSWORD': 'sc_pass',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         'USER': '',  # Not used with sqlite3.
+#         'PASSWORD': '',  # Not used with sqlite3.
+#         'HOST': '',  # Not used with sqlite3.
+#         'PORT': '',  # Not used with sqlite3.
+#         # for sqlite write lock timeout
+#         'OPTIONS': {
+#             'timeout': 10000,
+#         }
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -130,6 +165,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 3600
 
 LOGIN_URL = 'login'
 
@@ -157,4 +193,5 @@ REST_FRAMEWORK = {
 #     },
 # }
 
-RUNSERVERPLUS_SERVER_ADDRESS_PORT = '0.0.0.0:8000'
+# RUNSERVERPLUS_SERVER_ADDRESS_PORT = '0.0.0.0:8000'
+# STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'

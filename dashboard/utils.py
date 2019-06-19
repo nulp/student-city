@@ -1,4 +1,4 @@
-from .models import Hostel, Locality, Region, TypeLocality, Country, District, Book, BookNumber, Pasportyst, Person
+from .models import Hostel, Locality, Region, TypeLocality, Country, District, Book, Pasportyst, Person
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from unidecode import unidecode
@@ -34,9 +34,9 @@ def date_delta_years(date, years):
 
 
 def get_default_person_order():
-    order = ['id', 'surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
+    order = ['surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
              'passport_authority',
-             'date_of_issue', 'registered_date', 'de_registered_date', 'new_address', 'book_number', 'number_in_book',
+             'date_of_issue', 'registered', 'de_registered', 'new_address', 'book_number',
              'pasportyst',
              'locality', 'hostel', 'room', 'created', 'updated', 'note']
 
@@ -53,11 +53,10 @@ def get_ukrainian_person_field_names():
              'passport_number': 'Номер паспорта',
              'passport_authority': 'Орган видачі',
              'date_of_issue': 'Дата видачі',
-             'registered_date': 'Дата реєстації',
-             'de_registered_date': 'Дата виписки',
-             'new_address': 'Куди зареєст.',
+             'registered': 'Дата реєстації',
+             'de_registered': 'Дата зняття',
+             'new_address': 'Куди зараєст.',
              'book_number': 'Книга',
-             'number_in_book': 'Номер в книзі',
              'pasportyst': 'Паспортист',
              'locality': 'Нас. Пункт',
              'hostel': 'Гурт.',
@@ -95,7 +94,7 @@ def populate_hostels():
                 d[f] = line[i]
             address = d["Address"] + ", б." + d["Number"]
             number = str(int(d["NameObject"].split("№")[-1]))
-            Hostel.objects.create(address=address, number=number)
+            Hostel.objects. get_or_create(address=address, number=number)
 
 
 def populate_locs():
@@ -131,8 +130,8 @@ def populate_locs():
 
 
 def populate_db():
-    # populate_locs()
-    # populate_hostels()
+    populate_locs()
+    populate_hostels()
 
     b = {}
 
@@ -209,13 +208,18 @@ def populate_db():
                     else:
                         room = d['Room']
 
-                    registered_date = date_before_2000(d['DatePropysky'])
-                    try:
-                        de_registered_date = date_before_2000(d['DateOut'])
-                    except ValueError:
-                        de_registered_date = None
-
                     new_address = d['WhereOut']
+                    # new_address = new_address.strip()
+
+                    registered = date_before_2000(d['DatePropysky'])
+                    try:
+                        de_registered = date_before_2000(d['DateOut'])
+                        if de_registered < registered and not new_address:
+                            de_registered = None
+                    except ValueError:
+                        de_registered = None
+
+
 
                     number_in_book = int(d['NumberInBook'])
 
@@ -224,7 +228,7 @@ def populate_db():
                     try:
                         created = date_before_2000(d['DateCreate'])
                     except:
-                        created = registered_date
+                        created = registered
                     try:
                         updated = date_before_2000(d['DateEdit'])
                     except:
@@ -242,9 +246,10 @@ def populate_db():
                                                          password=slugify(unidecode(officer_name)) + '1')
 
                     pasportyst, _ = Pasportyst.objects.get_or_create(name=officer_name, active=True)
-                    book_number, _ = BookNumber.objects.get_or_create(number=book_name)
-                    book, _ = Book.objects.get_or_create(book_number_id=book_number.id, pasportyst_id=pasportyst.id,
-                                                         hostel_id=hostel_id, note=book_note)
+                    book, _ = Book.objects.get_or_create(number=book_name,
+                                                         hostel_id=hostel_id)
+                    book.note = book_note
+                    book.save()
 
                     locality_country = d['Country']
                     locality_region_cat = d['RegionCat']
@@ -276,7 +281,7 @@ def populate_db():
                         patronymic=patronymic,
                         birthday=birthday,
                         book=book,
-                        number_in_book=number_in_book,
+                        # number_in_book=number_in_book,
                         pasportyst_id=pasportyst.id,
                         locality=locality,
                         hostel_id=hostel_id,
@@ -289,8 +294,8 @@ def populate_db():
                     person.passport_number = passport_number
                     person.passport_authority = passport_authority
                     person.date_of_issue = date_of_issue
-                    person.registered_date = registered_date
-                    person.de_registered_date = de_registered_date
+                    person.registered = registered
+                    person.de_registered = de_registered
                     person.new_address = new_address
                     person.created = created
                     person.updated = updated
