@@ -25,6 +25,7 @@ from functools import reduce
 def pdb_test_view(request):
     import time
     start = time.time()
+
     populate_db()
     return HttpResponse(f"All done in {(time.time() - start)/60}")
 
@@ -266,6 +267,8 @@ def write_to_excel(body, head):
 
 @login_required
 def dashboard_view(request):
+    # import time
+    # start = time.time()
 
     _today = timezone.localtime(timezone.now())
 
@@ -502,6 +505,10 @@ def dashboard_view(request):
         'path_without_page': path_without_page,
 
     }
+
+
+    # print(f"All done in {(time.time() - start) / 60}")
+
     return render(request=request, template_name="dashboard_bottom.html", context=ctx)
 
 

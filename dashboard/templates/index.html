@@ -7,10 +7,10 @@
 {#    <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}"/>#}
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}"/>
     <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="{% static 'fonts/material-icons.css' %}" rel="stylesheet">
     <!--Import materialize.css-->
     <link type="text/css" rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+          href="{% static 'css/materialize.min.css' %}"
           media="screen,projection"/>
 
     {% block head %}
@@ -32,7 +32,8 @@
 {% endblock %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+{#<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>#}
+<script src="{% static 'js/materialize.min.js' %}"></script>
 <script src="{% static 'js/common.js' %}"></script>
 
 {% if messages %}
