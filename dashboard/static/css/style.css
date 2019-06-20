@@ -88,7 +88,9 @@ table.striped>tbody>tr:nth-child(odd) {
 nav {
     background-color: #417690 !important;
 }
-
+.main-bg-color {
+    background-color: #417690 !important;
+}
 .pagination li.active a {
     background-color: #417690 !important;
     color: white !important;
@@ -145,4 +147,18 @@ nav {
 
 .history-table td, .history-table th {
     padding: 3px 3px !important;
+}
+
+#id_page_visible {
+    height: 29px;
+    margin: 0;
+    padding: 0;
+}
+
+#go-to-page-btn {
+    height: 30px;
+    width: 30px;
+}
+#go-to-page-btn i {
+    line-height: 30px;
 }

@@ -69,26 +69,43 @@
                     <div class="col s4">
                         <ul class="pagination">
 
+                            {% if persons_paginator.has_previous %}
+                                <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.previous_page_number }}"><i class="material-icons">chevron_left</i></a></li>
+                                <li class="waves-effect"><a href="{{ path_without_page }}page=1">1</a></li>
+                            {% else %}
+                                <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                            {% endif %}
 
-                    {% if persons_paginator.has_previous %}
-                        <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.previous_page_number }}"><i class="material-icons">chevron_left</i></a></li>
-                        <li class="waves-effect"><a href="{{ path_without_page }}page=1">1</a></li>
-                    {% else %}
-                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
-                    {% endif %}
+                            <li class="active"><a href="#!">{{ persons_paginator.number }} </a></li>
 
-                    <li class="active"><a href="#!">{{ persons_paginator.number }} </a></li>
+                            {% if persons_paginator.has_next %}
+                                <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.paginator.num_pages }}">{{ persons_paginator.paginator.num_pages }}</a></li>
+                                <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.next_page_number }}"><i class="material-icons">chevron_right</i></a></li>
 
-                    {% if persons_paginator.has_next %}
-                        <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.paginator.num_pages }}">{{ persons_paginator.paginator.num_pages }}</a></li>
-                        <li class="waves-effect"><a href="{{ path_without_page }}page={{ persons_paginator.next_page_number }}"><i class="material-icons">chevron_right</i></a></li>
+                            {% else %}
+                                <li class="disabled"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+                            {% endif %}
 
-                    {% else %}
-                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
-                    {% endif %}
-
-                </ul>
+                        </ul>
                     </div>
+                    <div class="col s2">
+                        <form id="page-form">
+                            <div class="row no-margin-bottom">
+                                <div class="col s8">
+
+                                    <input placeholder="Сторінка" id="id_page_visible" type="number" min="1" step="1"
+                                           max="{{ persons_paginator.paginator.num_pages }}">
+
+                                </div>
+                                <div class="col s3">
+                                    <button id='go-to-page-btn'
+                                            class="btn-floating btn-small waves-effect waves-light main-bg-color"
+                                            type="submit"><i class="material-icons">last_page</i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
 
             </div>
@@ -96,7 +113,7 @@
     <hr style="margin-bottom: 15px;">
     <div class="row no-margin-bottom">
         <div class="col s12">
-            <form method="GET">
+            <form method="GET" id="search-form">
 
                 <div class="row" style="margin-top: -10px;">
 
@@ -412,6 +429,9 @@
                     </div>
 
                 </div>
+
+
+                <input type="hidden" name="page" id="page-hidden-input">
             </form>
         </div>
     </div>
@@ -445,12 +465,26 @@
                      $(this).addClass('grey-on-click');
                  });
              }
+             
+             function listeGo2Page() {
+                 $('#page-form').submit(function (event) {
+                    event.preventDefault();
+
+                    var page = $('#id_page_visible').val();
+                    $('#page-hidden-input').val(page);
+
+                    var form = $('#search-form');
+                    form.submit();
+
+                });
+             }
 
              function initPage() {
                 listenForPersonDBLClick();
                 listenForPersonClick();
 
                 listenForHostelChange();
+                listeGo2Page();
              }
 
              initPage();

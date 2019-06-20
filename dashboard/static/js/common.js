@@ -47,7 +47,7 @@ $(document).ready(function () {
         // Puts focus on the newWindow
         if (window.focus) newWindow.focus();
         return newWindow;
-    }
+    };
 
 
     window.listenNcapitalize = function (field) {
