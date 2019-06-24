@@ -23,8 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'random'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-DEBUG = True
+DEBUG = False
+# DEBUG = True
 
 
 def get_ip():
@@ -38,11 +38,6 @@ def get_ip():
     finally:
         s.close()
 
-    print(f"""
-    
-    Сайт доступний за адресом: {IP}:8000
-    
-    """)
     return IP
 
 
@@ -66,7 +61,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -193,5 +188,5 @@ REST_FRAMEWORK = {
 #     },
 # }
 
-# RUNSERVERPLUS_SERVER_ADDRESS_PORT = '0.0.0.0:8000'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'

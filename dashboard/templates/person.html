@@ -26,8 +26,7 @@
 
             <div class="col s12">
                 <div class="card-panel">
-                    <h4 class="center">Запис: <b>#{{ person.id }}</b></b> в книзі
-                        <b>{{ person.book_number }}</b></h4>
+                    <h4 class="center"><b>{{ person.full_name }}</b></h4>
 
                     <div class="row">
                         {% if person.deleted %}
@@ -39,69 +38,89 @@
                                 </h5>
                             </div>
                         {% else %}
-                            <div class="col s12">
-                                <p class="center">
-                                    <a class="waves-effect waves-light btn green"
-                                       href="{% url 'edit_person' pk=person.pk %}">Редагувати</a>
-                                </p>
-                            </div>
+                            {% if request.user.is_staff %}
+                                    <div class="col s12">
+                                        <p class="center">
+                                            <a class="waves-effect waves-light btn green"
+                                               href="{% url 'edit_person' pk=person.pk %}">Редагувати</a>
+                                        </p>
+                                    </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                     <hr>
                     <div class="row">
                         <div class="col l6 s12">
-                            <h6 class=""><b>ПІБ: </b>{{ person.surname }} {{ person.name }} {{ person.patronymic }}</h6>
+                            <h6 class=""><b>ПІБ: </b>{{ person.full_name }}</h6>
                         </div>
                         <div class="col l6 s12">
                             <h6 class=""><b>Дата народження: </b>{{ person.birthday|date:"d.m.Y" }}</h6>
                         </div>
-                        <div class="col l6 s12">
+                        <div class="col l3 s12">
                             <h6 class=""><b>Унікальний номер: </b>{% if person.unique_number %}
                                 {{ person.unique_number }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col l6 s12">
+                        <div class="col l3 s12">
                             <h6 class=""><b>Номер паспорта: </b>{% if person.passport_number %}
                                 {{ person.passport_number }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col l6 s12">
+                        <div class="col l3 s12">
                             <h6 class=""><b>Орган видачі: </b>{% if person.passport_authority %}
                                 {{ person.passport_authority }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col l6 s12">
+                        <div class="col l3 s12">
                             <h6 class=""><b>Дата видачі: </b>{% if person.date_of_issue %}
                                 {{ person.date_of_issue|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col l6 s12">
+
+                        <div class="col s12">
+                            <h6 class=""><b>Звідки прибув: </b>{% if person.old_address %}
+                                {{ person.old_address }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l3 s12">
                             <h6 class=""><b>Дата реєстрації: </b>{% if person.registered %}
                                 {{ person.registered|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col l6 s12">
+                         <div class="col l3 s12">
+                            <h6 class=""><b>Термін реєстрації: </b>{% if person.registered_period %}
+                                {{ person.registered_period|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l3 s12">
+                            <h6 class=""><b>Дата продовження: </b>{% if person.continued %}
+                                {{ person.continued|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+                         <div class="col l3 s12">
+                            <h6 class=""><b>Термін продовження: </b>{% if person.continued_period %}
+                                {{ person.continued_period|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
+                        </div>
+
+                        <div class="col s3">
                             <h6 class=""><b>Дата зняття з реєс.: </b>{% if person.de_registered %}
                                 {{ person.de_registered|date:"d.m.Y" }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col s12">
+                        <div class="col s9">
                             <h6 class=""><b>Куди зареєст.: </b>{% if person.new_address %}
                                 {{ person.new_address }}{% else %}<i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col l6 s12">
+                        <div class="col l3 s12">
+                            <h6 class=""><b>Гуртожиток: </b>{% if person.hostel %}{{ person.hostel.number }}{% else %}
+                                <i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l3 s12">
+                            <h6 class=""><b>Кімната: </b>{% if person.room %}{{ person.room }}{% else %}
+                                <i>-</i>{% endif %}</h6>
+                        </div>
+                        <div class="col l3 s12">
                             <h6 class=""><b>Книга: </b>{% if person.book_number %}{{ person.book_number }}{% else %}
                                 <i>-</i>{% endif %}</h6>
                         </div>
-                        <div class="col l6 s12">
+                        <div class="col l3 s12">
                             <h6 class=""><b>Паспортист: </b>{% if person.pasportyst %}{{ person.pasportyst }}{% else %}
                                 <i>-</i>{% endif %}</h6>
                         </div>
                         <div class="col s12">
-                            <h6 class=""><b>Нас. Пункт: </b>{% if person.locality %}
+                            <h6 class=""><b>Місце народження: </b>{% if person.locality %}
                                 {{ person.locality.full_locality }}{% else %}<i>-</i>{% endif %}</h6>
-                        </div>
-                        <div class="col l6 s12">
-                            <h6 class=""><b>Гуртожиток: </b>{% if person.hostel %}{{ person.hostel.number }}{% else %}
-                                <i>-</i>{% endif %}</h6>
-                        </div>
-                        <div class="col l6 s12">
-                            <h6 class=""><b>Кімната: </b>{% if person.room %}{{ person.room }}{% else %}
-                                <i>-</i>{% endif %}</h6>
                         </div>
                         <div class="col l6 s12">
                             <h6 class=""><b>Примітка: </b>{% if person.note %}{{ person.note }}{% else %}
@@ -128,8 +147,8 @@
                         </div>
 
                     </div>
-                    <hr>
                     {% if history %}
+                        <hr>
                         <div class="row">
                             <h5 class="center">Історія змін</h5>
                         </div>
@@ -155,29 +174,32 @@
                             </table>
                         </div>
                     {% endif %}
+                {% if request.user.is_staff %}
                     {% if not person.deleted %}
                         <hr>
                         <div class="row">
                             <div class="col s12">
                                 <p class="center">
                                     <button class="delete-person-btn waves-effect waves-light btn red accent-2"
-                                       data-id="{{ person.id }}">Видалити</button>
+                                            data-id="{{ person.id }}">Видалити
+                                    </button>
                                 </p>
                             </div>
                         </div>
                     {% else %}
-                        {% if request.user.is_staff %}
-                            <hr>
-                            <div class="row">
-                                <div class="col s12">
-                                    <p class="center">
-                                        <button class="restore-person-btn waves-effect waves-light btn red accent-2"
-                                           data-id="{{ person.id }}">Відновити</button>
-                                    </p>
-                                </div>
+
+                        <hr>
+                        <div class="row">
+                            <div class="col s12">
+                                <p class="center">
+                                    <button class="restore-person-btn waves-effect waves-light btn red accent-2"
+                                            data-id="{{ person.id }}">Відновити
+                                    </button>
+                                </p>
                             </div>
-                        {% endif %}
+                        </div>
                     {% endif %}
+                {% endif %}
 
                 </div>
             </div>

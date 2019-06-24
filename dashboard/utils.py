@@ -34,11 +34,12 @@ def date_delta_years(date, years):
 
 
 def get_default_person_order():
-    order = ['surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
+    order = ['surname', 'name', 'patronymic', 'birthday', 'unique_number', 'old_address', 'passport_number',
              'passport_authority',
-             'date_of_issue', 'registered', 'de_registered', 'new_address', 'book_number',
+             'date_of_issue', 'registered', 'registered_period', 'continued', 'continued_period', 'de_registered', 'new_address', 'book_number',
              'pasportyst',
-             'locality', 'hostel', 'room', 'created', 'updated', 'note']
+             'country', 'region', 'district', 'locality',
+             'hostel', 'hostel_address', 'room', 'created', 'created_by', 'updated', 'updated_by', 'note']
 
     return order
 
@@ -54,15 +55,25 @@ def get_ukrainian_person_field_names():
              'passport_authority': 'Орган видачі',
              'date_of_issue': 'Дата видачі',
              'registered': 'Дата реєстації',
+             'registered_period': 'Термін реєстації',
+             'continued': 'Дата продовження',
+             'continued_period': 'Термін продовження',
              'de_registered': 'Дата зняття',
+             'old_address': 'Звідки прибув',
              'new_address': 'Куди зараєст.',
              'book_number': 'Книга',
              'pasportyst': 'Паспортист',
+             'country': 'Країна',
+             'region': 'Область',
+             'district': 'Район',
              'locality': 'Нас. Пункт',
              'hostel': 'Гурт.',
+             'hostel_address': 'Адреса реєс.',
              'room': 'Кімната',
              'created': 'Створено',
+             'created_by': 'Створив',
              'updated': 'Змінено',
+             'updated_by': 'Змінив',
              'note': 'Примітка',
              'edited_by': 'Змінив',
              'edited_time': 'Час'}
@@ -94,7 +105,7 @@ def populate_hostels():
                 d[f] = line[i]
             address = d["Address"] + ", б." + d["Number"]
             number = str(int(d["NameObject"].split("№")[-1]))
-            Hostel.objects. get_or_create(address=address, number=number)
+            Hostel.objects.get_or_create(address=address, number=number)
 
 
 def populate_locs():
@@ -130,8 +141,9 @@ def populate_locs():
 
 
 def populate_db():
-    populate_locs()
-    populate_hostels()
+    if Locality.objects.all().count() == 0:
+        populate_locs()
+        populate_hostels()
 
     b = {}
 
@@ -201,6 +213,16 @@ def populate_db():
                                 except:
                                     unique_number += ', ' + date_of_issue
                                     date_of_issue = None
+                        # elif len(data) == 3:
+                        #     passport_number, passport_authority, date_of_issue = data
+                        #     try:
+                        #         date_of_issue = datetime.strptime(date_of_issue, "%d.%m.%y").date()
+                        #     except:
+                        #         try:
+                        #             date_of_issue = datetime.strptime(date_of_issue, "%d.%m.%Y").date()
+                        #         except:
+                        #             unique_number = date_of_issue
+                        #             date_of_issue = None
                         else:
                             unique_number = ', '.join(data)
 

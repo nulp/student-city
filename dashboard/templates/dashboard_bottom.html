@@ -8,37 +8,40 @@
 
 {% block content %}
     <nav class="dashboard-nav">
-                <div class="nav-wrapper">
-                    <ul class="left">
-                        <li><a target="_blank" href="{% url "create_person" %}">Додати до списку<i
-                                class="material-icons right">add</i></a></li>
-                        <li><a target="_blank"  href="{{ path_without_page }}excel">Завантажити<i
-                                class="material-icons right">cloud_download</i></a></li>
-                    </ul>
-                    <ul class="right">
+        <div class="nav-wrapper">
+            <ul class="left">
+                {% if request.user.is_staff %}
+                    <li><a target="_blank" href="{% url "create_person" %}">Додати до списку<i
+                        class="material-icons right">add</i></a></li>
+                {% endif %}
+
+                <li><a target="_blank"  href="{{ path_without_page }}excel">Завантажити<i
+                        class="material-icons right">cloud_download</i></a></li>
+            </ul>
+            <ul class="right">
 {#                        <li><a href="#">Гуртожитки</a></li>#}
 {#                        <li><a href="#">Книги</a></li>#}
 {#                        <li><a href="#">Нас. Пункти</a></li>#}
-                        {% if user.is_staff %}
+                {% if user.is_staff %}
 
-                        {% endif %}
-                        {% if user.is_authenticated %}
-                            {% if request.GET.deleted %}
-                                <li><a href="{% url "main" %}">Активні</a></li>
-                            {% else %}
-                                <li><a href="{% url "main" %}?deleted=1">Видалені</a></li>
-                            {% endif %}
-                            <li><a href="{% url "logout" %}">Вийти - {{ request.user.username }}</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </nav>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    {% if request.GET.deleted %}
+                        <li><a href="{% url "main" %}">Активні</a></li>
+                    {% else %}
+                        <li><a href="{% url "main" %}?deleted=1">Видалені</a></li>
+                    {% endif %}
+                    <li><a href="{% url "logout" %}">Вийти - {{ request.user.username }}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
 
     <div class="row no-margin-bottom" style="margin-bottom: -15px!important;">
 
             <div class="row dashboard-table half-screen">
-                <table class="striped">
-                    <thead>
+                <table id="dashboard-table" class="striped" style="display: None">
+                    <thead class="no-user-select">
                     <tr>
                         {% for field in table_fields %}
                             <th>{{ field }}</th>
@@ -48,13 +51,9 @@
 
                     <tbody>
                     {% for p in persons %}
-                        <tr class="grey-on-hover data-row ">
-                            {% for f in p %}
-                                {% if f|slice:":4" == 'data' %}
-                                    <td class="hide" {{ f }}></td>
-                                {% else %}
+                        <tr class="grey-on-hover data-row " data-id="{{ p.id }}">
+                            {% for f in p.data %}
                                     <td class="text-nowrap">{{ f }}</td>
-                                {% endif %}
                             {% endfor %}
                         </tr>
                     {% endfor %}
@@ -385,9 +384,9 @@
                                         </label>
                                     </p>
                                 </div>
-                                <div class="col s4 input-field ">
-                                    <input id="age" value="{% if request.GET.age %}{{ request.GET.age }}{% else %}18{% endif %}" name="age" type="number" min="1" step="1" max="120">
+                                <div class="col s4">
                                     <label for="age">Вік</label>
+                                    <input style="margin-top: -7px" id="age" value="{% if request.GET.age %}{{ request.GET.age }}{% else %}18{% endif %}" name="age" type="number" min="1" step="1" max="120">
                                 </div>
                                 <div class="col s4 input-field ">
                                     <input type="date" id="age_on" name="age_on"
@@ -454,7 +453,7 @@
 
              function listenForPersonDBLClick() {
                   $(".data-row").dblclick(function () {
-                     pID = $(this).find("[data-id]").first().data('id');
+                     pID = $(this).data('id');
                      window.open('person/' + pID, "_blank");
                  });
              }
@@ -479,12 +478,37 @@
                 });
              }
 
+             function initDTable() {
+                 var dtable = $('#dashboard-table');
+                 dtable.DataTable(
+                     {
+                         colReorder: true,
+                         "lengthChange": false,
+                         "info": false,
+                         "paging": false,
+                         "searching": false,
+                         "ordering": false,
+                         "stateSave": true,
+                         "fnStateSave": function (oSettings, oData) {
+                             localStorage.setItem('DataTables_' + window.location.pathname, JSON.stringify(oData));
+                         },
+                         "fnStateLoad": function (oSettings) {
+                             var data = localStorage.getItem('DataTables_' + window.location.pathname);
+                             return JSON.parse(data);
+                         }
+                     }
+                 );
+                 dtable.show();
+             }
+
              function initPage() {
                 listenForPersonDBLClick();
                 listenForPersonClick();
 
                 listenForHostelChange();
                 listeGo2Page();
+
+                initDTable();
              }
 
              initPage();

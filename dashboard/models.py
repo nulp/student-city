@@ -24,6 +24,7 @@ class Region(models.Model):
     class Meta:
         ordering = ['name']
 
+
 class District(models.Model):
     # район
     name = models.CharField(db_index=True, max_length=256)
@@ -35,12 +36,16 @@ class District(models.Model):
     class Meta:
         ordering = ['name']
 
+
 class TypeLocality(models.Model):
     name = models.CharField(max_length=32)
     short = models.CharField(max_length=8)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['name']
 
 
 class Locality(models.Model):
@@ -190,6 +195,12 @@ class Person(models.Model):
             p = ' ' + self.patronymic[0] + '. '
         return f"{self.surname} {self.name[0]}.{p}"
 
+    @property
+    def full_name(self):
+        p = ''
+        if self.patronymic:
+            p = ' ' + self.patronymic + ' '
+        return f"{self.surname} {self.name}{p}"
 
     def __str__(self):
         return self.name + ' ' + self.surname

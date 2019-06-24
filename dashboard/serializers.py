@@ -62,6 +62,9 @@ class PersonSerializer(serializers.ModelSerializer):
 
 
 class PersonTableSerializer(serializers.ModelSerializer):
+    country = serializers.SerializerMethodField()
+    region = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
     locality = serializers.SerializerMethodField()
     hostel = serializers.SerializerMethodField()
     book_number = serializers.SerializerMethodField()
@@ -75,22 +78,40 @@ class PersonTableSerializer(serializers.ModelSerializer):
     continued = serializers.SerializerMethodField()
     continued_period = serializers.SerializerMethodField()
     de_registered = serializers.SerializerMethodField()
+    hostel_address = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
+    created_by = serializers.SerializerMethodField()
     updated = serializers.SerializerMethodField()
+    updated_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Person
         fields = ('pasportyst', 'book_number',
-                  'locality', 'hostel', 'room',
+                  'country', 'region', 'district', 'locality', 'hostel', 'room',
                   'id', 'name', 'surname', 'patronymic', 'birthday', 'unique_number', 'passport_number',
                   'passport_authority',
                   'date_of_issue', 'registered', 'registered_period', 'continued', 'continued_period', 'de_registered',
-                  'new_address', 'old_address',
-                  'created', 'updated', 'note')
+                  'new_address', 'old_address', 'hostel_address',
+                  'created', 'updated', 'created_by', 'updated_by', 'note')
+
+    def get_country(self, obj):
+        if obj.locality and obj.locality.region and obj.locality.region.country:
+            return obj.locality.region.country.name
+        return '-'
+
+    def get_region(self, obj):
+        if obj.locality and obj.locality.region:
+            return obj.locality.region.name
+        return '-'
+
+    def get_district(self, obj):
+        if obj.locality and obj.locality.district:
+            return obj.locality.district.name
+        return '-'
 
     def get_locality(self, obj):
         if obj.locality:
-            return obj.locality.full_locality
+            return obj.locality.type_locality.short + ' ' + obj.locality.name
         return '-'
 
     def get_birthday(self, obj):
@@ -133,9 +154,24 @@ class PersonTableSerializer(serializers.ModelSerializer):
             return obj.created.strftime('%d.%m.%Y')
         return '-'
 
+    def get_created_by(self, obj):
+        if obj.created_by:
+            return str(obj.created_by)
+        return '-'
+
+    def get_hostel_address(self, obj):
+        if obj.hostel:
+            return obj.hostel.address
+        return '-'
+
     def get_updated(self, obj):
         if obj.updated:
             return obj.updated.strftime('%d.%m.%Y')
+        return '-'
+
+    def get_updated_by(self, obj):
+        if obj.updated_by:
+            return str(obj.updated_by)
         return '-'
 
     def get_hostel(self, obj):

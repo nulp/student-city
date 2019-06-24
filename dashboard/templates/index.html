@@ -12,6 +12,8 @@
           href="{% static 'css/materialize.min.css' %}"
           media="screen,projection"/>
 
+    <link href="{% static 'css/datatables.min.css' %}" rel="stylesheet">
+
     {% block head %}
 
     {% endblock %}
@@ -31,7 +33,8 @@
 {% endblock %}
 
 <script src="{% static 'js/jquery.min.js' %}"></script>
-<script src="{% static 'js/materialize.min.js' %}"></script>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/datatables.min.js' %}"></script>
 <script src="{% static 'js/common.js' %}"></script>
 
 {% if messages %}

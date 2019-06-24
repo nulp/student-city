@@ -8,6 +8,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 from django.contrib import messages
 from django.db.models import Q
+from django.conf import settings
 from .models import Person, Locality, Hostel, Pasportyst, Country, Region, District, TypeLocality, \
     PersonHistory, Book
 
@@ -22,23 +23,23 @@ import operator
 from functools import reduce
 
 
+@staff_member_required
 def pdb_test_view(request):
-    import time
-    start = time.time()
+    if settings.DEBUG:
+        import time
+        start = time.time()
 
-    populate_db()
-    return HttpResponse(f"All done in {(time.time() - start)/60}")
+        populate_db()
+        return HttpResponse(f"All done in {(time.time() - start)/60}")
+    else:
+        return HttpResponse("Nothing here!")
 
 
 @login_required
 def person_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
     history = PersonHistory.objects.filter(person_id=person.id)
-    table_fields = ['surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
-                     'passport_authority',
-                     'date_of_issue', 'registered', 'de_registered', 'new_address', 'book_number',
-                     'pasportyst',
-                     'locality', 'hostel', 'room', 'created', 'updated', 'note']
+    table_fields = get_default_person_order()
 
     history = [p for p in history]
     for i, p in enumerate(history):
@@ -58,7 +59,7 @@ def person_view(request, pk):
     return render(request, template_name='person.html', context=ctx)
 
 
-@login_required
+@staff_member_required
 def delete_person_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
 
@@ -69,7 +70,7 @@ def delete_person_view(request, pk):
     return redirect('show_person', pk=pk)
 
 
-@login_required
+@staff_member_required
 def add_country(request):
 
     if request.method == 'POST':
@@ -81,7 +82,7 @@ def add_country(request):
     return render(request, template_name='add_country.html', context={})
 
 
-@login_required
+@staff_member_required
 def add_region(request, country_id):
 
     country = get_object_or_404(Country, id=country_id)
@@ -96,7 +97,7 @@ def add_region(request, country_id):
     return render(request, template_name='add_region.html', context={'country': country})
 
 
-@login_required
+@staff_member_required
 def add_district(request, region_id):
 
     region = get_object_or_404(Region, id=region_id)
@@ -110,7 +111,7 @@ def add_district(request, region_id):
     return render(request, template_name='add_district.html', context={'region': region})
 
 
-@login_required
+@staff_member_required
 def add_locality(request):
 
     if request.method == 'POST':
@@ -139,8 +140,7 @@ def restore_person_view(request, pk):
 #     return render(request, template_name='person.html', context={'person': person})
 
 
-
-@login_required
+@staff_member_required
 def edit_person_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
 
@@ -191,7 +191,7 @@ def edit_person_view(request, pk):
     return render(request, template_name='person_edit.html', context=ctx)
 
 
-@login_required
+@staff_member_required
 def create_person_view(request):
     person = {}
 
@@ -229,7 +229,7 @@ def create_person_view(request):
     ctx = {
         'person': person,
         'book_numbers': Book.objects.all(),
-        'pasportysts': Pasportyst.objects.all(),
+        'pasportysts': Pasportyst.objects.filter(active=True),
         'hostels': Hostel.objects.all(),
         'countries': Country.objects.all(),
         'districts': districts,
@@ -254,9 +254,8 @@ def write_to_excel(body, head):
     for c, col in enumerate(head):
         worksheet.write(0, c, col)
 
-    n = len(head)
     for r, row in enumerate(body):
-        row = row[:n]
+        row = row['data']
         for c, col in enumerate(row):
             worksheet.write(r + 1, c, col)
 
@@ -315,7 +314,8 @@ def dashboard_view(request):
         if surname.strip():
             surname = surname.strip()
             surname = surname.capitalize()
-            person_filters.append(Q(surname__icontains=surname) | Q(name__icontains=surname))
+            # | Q(name__icontains=surname)
+            person_filters.append(Q(surname__icontains=surname))
         else:
             request.GET.pop('surname')
 
@@ -328,6 +328,8 @@ def dashboard_view(request):
             person_filters.append(Q(note__icontains=note))
         else:
             request.GET.pop('note')
+
+
 
     # filter by birthday from request
     if request.GET.get('birth_check'):
@@ -473,9 +475,8 @@ def dashboard_view(request):
                 e = '-'
             row.append(e)
 
-        row.append(f'data-id={pd.get("id")}')
-
-        persons[i] = row
+        # row.append(f'data-id={pd.get("id")}')
+        persons[i] = {'data': row, 'id': p.id}
 
     # additional context data
     ukr_names = get_ukrainian_person_field_names()

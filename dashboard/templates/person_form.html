@@ -2,33 +2,34 @@
     {% csrf_token %}
 
     <!-- Surname | Name | Patronymic -->
-    <div class="row">
-        <div class="col s4">
+    <div class="row no-margin-bottom">
+        <div class="col s3">
             <label for="id_surname">Прізвище:</label>
             <input type="text" name="surname" maxlength="128"
                    required id="id_surname" value="{{ person.surname }}">
         </div>
-        <div class="col s4">
+        <div class="col s3">
             <label for="id_name">Ім'я:</label>
             <input type="text" name="name" maxlength="128" required
                    id="id_name" value="{{ person.name }}">
         </div>
-        <div class="col s4">
+        <div class="col s3">
             <label for="id_patronymic">Побатькові:</label>
             <input type="text" name="patronymic"
                    maxlength="128" id="id_patronymic" value="{{ person.patronymic }}">
         </div>
-    </div>
-
-    <!-- Birthday | unique number -->
-    <div class="row">
-        <div class="col s4">
+        <div class="col s3">
             <label for="id_birthday">Дата народження:</label>
             <input type="date" name="birthday" id="id_birthday" required
                    value="{% if person.birthday %}{{ person.birthday|date:"Y-m-d" }}{% endif %}"
                    min="1900-01-01" max="{% now "Y-m-d" %}">
         </div>
-        <div class="col s4">
+    </div>
+
+    <!-- Birthday | unique number -->
+    <div class="row">
+
+        <div class="col s3">
             <div class="row no-margin-bottom" style="margin-top: 20px;">
                 <div class="col s6">
 
@@ -48,7 +49,11 @@
                 </div>
             </div>
         </div>
-        <div class="col s4">
+    </div>
+
+    <!-- passport_number | passport_authority | date_of_issue -->
+    <div class="row no-margin-bottom">
+        <div class="col s2" {% if person and not person.unique_number %}style="display: none" {% endif %}>
             <label for="id_unique_number">Унікальний номер:</label>
             <input type="text" {% if person and not person.unique_number %}disabled{% endif %}
                    value="{% if person.unique_number %}{{ person.unique_number }}{% endif %}"
@@ -56,11 +61,7 @@
                    maxlength="100"
                    id="id_unique_number">
         </div>
-    </div>
-
-    <!-- passport_number | passport_authority | date_of_issue -->
-    <div class="row">
-        <div class="col s4">
+        <div class="col s2">
             <label for="id_passport_number">Номер паспорта:</label>
             <input type="text"
                    value="{% if person.passport_number %}{{ person.passport_number }}{% endif %}"
@@ -68,7 +69,13 @@
                    maxlength="32" required
                    id="id_passport_number">
         </div>
-        <div class="col s4">
+        <div class="col s2">
+            <label for="id_date_of_issue">Дата видачі:</label>
+            <input type="date" name="date_of_issue" required id="id_date_of_issue"
+                   value="{% if person.date_of_issue %}{{ person.date_of_issue|date:"Y-m-d"  }}{% endif %}"
+                   min="1900-01-01" max="{% now "Y-m-d" %}">
+        </div>
+        <div class="col s6">
             <label for="id_passport_authority">Орган видачі паспорта:</label>
             <input type="text"
                    value="{% if person.passport_authority %}{{ person.passport_authority }}{% endif %}"
@@ -77,14 +84,8 @@
                    required
                    id="id_passport_authority">
         </div>
-        <div class="col s4">
-            <label for="id_date_of_issue">Дата видачі:</label>
-            <input type="date" name="date_of_issue" required id="id_date_of_issue"
-                   value="{% if person.date_of_issue %}{{ person.date_of_issue|date:"Y-m-d"  }}{% endif %}"
-                   min="1900-01-01" max="{% now "Y-m-d" %}">
-        </div>
     </div>
-
+    <p class=""><b>Реєстрація:</b></p>
     <!-- Registered | Period -->
     <div class="row">
         <div class="col s3">
@@ -214,7 +215,7 @@
     <p class=""><b>Місце народження:</b></p>
     <!-- Locality -->
     <div class="row">
-        <div class="col s6">
+        <div class="col s2">
             <label for="id_country">Країна:</label>
             <select class="browser-default"
                     name="country"
@@ -229,7 +230,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col s6">
+        <div class="col s2">
             <label for="id_region">Область:</label>
             <select class="browser-default"
                     name="region"
@@ -243,7 +244,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col s4">
+        <div class="col s3">
             <label for="id_district">Район:</label>
             <select class="browser-default"
                     name="district"
@@ -263,7 +264,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col s4">
+        <div class="col s2">
             <label for="id_type_locality">Категорія н.п.:</label>
             <select class="browser-default"
                     name="type_locality"
@@ -278,7 +279,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col s4">
+        <div class="col s3">
             <label for="id_locality">Нас. пункт:</label>
             <select class="browser-default"
                     name="locality"
