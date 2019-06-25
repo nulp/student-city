@@ -34,7 +34,7 @@ class PersonForm(forms.ModelForm):
         fields = ['surname', 'name', 'patronymic', 'birthday', 'unique_number', 'passport_number',
                   'passport_authority',
                   'date_of_issue', 'registered', 'registered_period', 'continued_period', 'continued', 'de_registered', 'new_address',
-                  'pasportyst',
+                  'pasportyst', 'old_address',
                   'locality', 'hostel', 'room', 'note', 'book']
 
     # def clean_name(self):

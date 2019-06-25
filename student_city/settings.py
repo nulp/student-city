@@ -23,8 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'random'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
 
 def get_ip():
@@ -94,32 +94,32 @@ WSGI_APPLICATION = 'student_city.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'scity',
-        'USER': 'scuser',
-        'PASSWORD': 'sc_pass',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    }
-}
-
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#         'USER': '',  # Not used with sqlite3.
-#         'PASSWORD': '',  # Not used with sqlite3.
-#         'HOST': '',  # Not used with sqlite3.
-#         'PORT': '',  # Not used with sqlite3.
-#         # for sqlite write lock timeout
-#         'OPTIONS': {
-#             'timeout': 10000,
-#         }
-#     },
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'scity',
+#         'USER': 'scuser',
+#         'PASSWORD': 'sc_pass',
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     }
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'USER': '',  # Not used with sqlite3.
+        'PASSWORD': '',  # Not used with sqlite3.
+        'HOST': '',  # Not used with sqlite3.
+        'PORT': '',  # Not used with sqlite3.
+        # for sqlite write lock timeout
+        'OPTIONS': {
+            'timeout': 10000,
+        }
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

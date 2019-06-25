@@ -73,7 +73,10 @@ $(document).ready(function () {
                 }
             });
 
-            if (cnt && confirm(msg_text)) {
+            if (cnt) {
+                if (confirm(msg_text))
+                    form.submit();
+            } else {
                 form.submit();
             }
 

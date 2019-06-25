@@ -507,7 +507,6 @@ def dashboard_view(request):
 
     }
 
-
     # print(f"All done in {(time.time() - start) / 60}")
 
     return render(request=request, template_name="dashboard_bottom.html", context=ctx)

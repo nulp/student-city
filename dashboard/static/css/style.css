@@ -35,13 +35,23 @@ table.striped>tbody>tr:nth-child(odd) {
     overflow-y: auto;
     display: block;
     margin-bottom: 5px;
-    height: calc(100vh - 80px);
+    /*height: calc(100vh - 80px);*/
+    height: calc(50vh - 65px) !important;
 }
 
 
 .half-screen {
     height: calc(50vh - 65px) !important;
     width: calc(100vw) !important;
+}
+.overflow-scroll {
+    overflow-x: auto;
+    overflow-y: auto;
+    /*display: block;*/
+}
+
+#search-form {
+    margin-top: 5px;
 }
 
 .pagination {

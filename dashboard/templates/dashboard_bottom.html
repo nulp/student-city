@@ -110,25 +110,77 @@
             </div>
     </div>
     <hr style="margin-bottom: 15px;">
-    <div class="row no-margin-bottom">
+    <div class="row no-margin-bottom half-screen overflow-scroll">
         <div class="col s12">
-            <form method="GET" id="search-form">
+            <form method="GET" id="search-form" >
 
                 <div class="row" style="margin-top: -10px;">
 
-                    <div class="col s2">
+                    <!-- buttons -->
+                    <div class="col s1">
                         <div class="row">
                             <div class="col s12">
                                 <p class="center">
-                                    <a class="waves-effect waves-light btn red accent-1" href="{% url 'main' %}">Очистити</a>
+                                    <a class="waves-effect waves-light btn red accent-1" href="{% url 'main' %}"><i class="material-icons">settings_backup_restore</i></a>
                                 </p>
                             </div>
-                            <div class="col s12">
+                            <div class="col s12" id="search-btn-col">
                                 <p class="center">
                                     <button class="green btn waves-effect waves-light" type="submit">
-                                        Застосувати
+                                        <i class="material-icons">search</i>
                                     </button>
                                 </p>
+                            </div>
+                            <div class="col s12 center" id="preloader-col" style="display: none;">
+                                <div class="preloader-wrapper small active">
+                                    <div class="spinner-layer spinner-blue">
+                                        <div class="circle-clipper left">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="gap-patch">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="circle-clipper right">
+                                            <div class="circle"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="spinner-layer spinner-red">
+                                        <div class="circle-clipper left">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="gap-patch">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="circle-clipper right">
+                                            <div class="circle"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="spinner-layer spinner-yellow">
+                                        <div class="circle-clipper left">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="gap-patch">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="circle-clipper right">
+                                            <div class="circle"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="spinner-layer spinner-green">
+                                        <div class="circle-clipper left">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="gap-patch">
+                                            <div class="circle"></div>
+                                        </div>
+                                        <div class="circle-clipper right">
+                                            <div class="circle"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <hr>
@@ -160,279 +212,295 @@
                             </div>
                         </div>
                     </div>
+                    <!-- buttons end -->
 
-                    <div class="col s10">
-{#                        <p><b>Пошук:</b></p>#}
-                    <div class="row no-margin-bottom">
-                        <div class="col s2">
-                            <label for="id_hostel">Гуртожиток:</label>
-                            <select class="browser-default"
-                                    name="hostel"
-                                    id="id_hostel"
-                                    data-source="{% url 'hostel_api' %}"
-                                    data-valueKey="id"
-                                    data-displayKey="number">
+                    <!-- filters -->
+                    <div class="col s11">
+                        <div class="row no-margin-bottom">
+                            <div class="col s2">
+                                <div class="input-field">
+                                    <input id="surname" type="text" name="surname" value="{{ request.GET.surname }}">
+                                    <label for="surname">Прізвище</label>
+                                </div>
+                            </div>
+                            <div class="col s2">
+                                <label for="id_hostel">Гуртожиток:</label>
+                                <select class="browser-default"
+                                        name="hostel"
+                                        id="id_hostel"
+                                        data-source="{% url 'hostel_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="number">
 
-                                <option value="-1" selected>всі</option>
-                                {% for hostel in hostels %}
-                                    <option {% if request.GET.hostel == hostel.id|slugify %}selected{% endif %} value="{{ hostel.id }}">{{ hostel }}</option>
-                                {% endfor %}
-                            </select>
+                                    <option value="-1" selected>всі</option>
+                                    {% for hostel in hostels %}
+                                        <option {% if request.GET.hostel == hostel.id|slugify %}selected{% endif %} value="{{ hostel.id }}">{{ hostel }}</option>
+                                    {% endfor %}
+                                </select>
 
-                        </div>
-                        <div class="col s2">
+                            </div>
+                            <div class="col s2">
 
-                            <label for="id_book">Книга:</label>
-                            <select class="browser-default"
-                                    name="book"
-                                    id="id_book"
-                                    data-source="{% url 'book_api' %}"
-                                    data-valueKey="id"
-                                    data-displayKey="number">
+                                <label for="id_book">Книга:</label>
+                                <select class="browser-default"
+                                        name="book"
+                                        id="id_book"
+                                        data-source="{% url 'book_api' %}"
+                                        data-valueKey="id"
+                                        data-displayKey="number">
 
-                                <option value="-1" selected>всі</option>
-                                {% for bn in book_numbers %}
-                                    <option {% if request.GET.book == bn.id|slugify %}selected{% endif %} value="{{ bn.id }}">{{ bn }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col s2">
-                            <div class="input-field">
-                                <input id="surname" type="text" name="surname" value="{{ request.GET.surname }}">
-                                <label for="surname">Прізвище</label>
+                                    <option value="-1" selected>всі</option>
+                                    {% for bn in book_numbers %}
+                                        <option {% if request.GET.book == bn.id|slugify %}selected{% endif %} value="{{ bn.id }}">{{ bn }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col s2">
+                                <label>Паспортист</label>
+                                <select class="browser-default" name="pasportyst">
+                                    <option value="-1" selected>всі</option>
+                                    {% for pas in pasportysts %}
+                                        <option {% if request.GET.pasportyst == pas.id|slugify %}selected{% endif %} value="{{ pas.id }}">{{ pas }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col s2">
+                                <div class="input-field">
+                                    <input id="note" type="text" name="note" value="{{ request.GET.note }}">
+                                    <label for="note">Примітка</label>
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px" class="col s2">
+                                <p>
+                                    <label>
+                                        <input type="checkbox" name="expired" value="1" class="filled-in" {% if request.GET.expired == '1'%}checked{% endif %}/>
+                                        <span>Протерміновані</span>
+                                    </label>
+                                </p>
                             </div>
                         </div>
-                        <div class="col s6">
-                            <div class="row no-margin-bottom" style="margin: 20px">
-                                <div class="col s4">
-                                    <label>
-                                        <input class="with-gap" name="registered" value="-1" type="radio" {% if request.GET.registered == '-1' %}checked{% endif %}/>
-                                        <span>всі</span>
-                                    </label>
-                                </div>
-                                <div class="col s4">
-                                    <label>
-                                        <input class="with-gap" name="registered" value="0" type="radio" {% if request.GET.registered == '0' or request.GET.registered is None %}checked{% endif %}/>
-                                        <span>приписані</span>
-                                    </label>
-                                </div>
-                                <div class="col s4">
-                                    <label>
-                                        <input class="with-gap" name="registered" value="1" type="radio" {% if request.GET.registered == '1' %}checked{% endif %}/>
-                                        <span>виписані</span>
-                                    </label>
-                                </div>
 
-                                </div>
+                        <div class="row no-margin-bottom">
+                            <div class="col s4">
                                 <hr>
-                            </div>
-                        </div>
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-                                    <p>
+                                <div class="row no-margin-bottom" style="margin: 10px">
+                                    <div class="col s4">
                                         <label>
-                                            <input type="checkbox" class="filled-in" name="birth_check" value="1" {% if request.GET.birth_check == '1'%}checked{% endif %}/>
-                                            <span>Дата народження</span>
+                                            <input class="with-gap" name="registered" value="-1" type="radio" {% if request.GET.registered == '-1' %}checked{% endif %}/>
+                                            <span>всі</span>
                                         </label>
-                                    </p>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="birthday_start" name="birthday_start"
-                                           value="{% if request.GET.birthday_start %}{{ request.GET.birthday_start }}{% else %}1900-01-01{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="birthday_start">Від</label>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="birthday_end" name="birthday_end"
-                                           value="{% if request.GET.birthday_end %}{{ request.GET.birthday_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="birthday_end">До</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-
-                                    <label>
-                                        <input type="checkbox" name="reg_check" value="1" class="filled-in" {% if request.GET.reg_check == '1'%}checked{% endif %}/>
-                                        <span>Дата реєстрації</span>
-                                    </label>
-
-                                </div>
-                                <div class="col s4 input-field">
-                                    <input type="date" id="reg_start" name="reg_start"
-                                           value="{% if request.GET.reg_start %}{{ request.GET.reg_start }}{% else %}1900-01-01{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="reg_start">Від</label>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="reg_end" name="reg_end"
-                                           value="{% if request.GET.reg_end %}{{ request.GET.reg_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="reg_end">До</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-
-                                    <label>
-                                        <input type="checkbox" name="reg_per_check" value="1" class="filled-in" {% if request.GET.reg_per_check == '1'%}checked{% endif %}/>
-                                        <span>Термін реєстрації</span>
-                                    </label>
-
-                                </div>
-                                <div class="col s4 input-field">
-                                    <input type="date" id="reg_per_start" name="reg_per_start"
-                                           value="{% if request.GET.reg_per_start %}{{ request.GET.reg_per_start }}{% else %}1900-01-01{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="reg_per_start">Від</label>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="reg_per_end" name="reg_per_end"
-                                           value="{% if request.GET.reg_per_end %}{{ request.GET.reg_per_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
-                                           min="1900-01-01" >
-                                    <label for="reg_per_end">До</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-
-                                    <label>
-                                        <input type="checkbox" name="cont_check" value="1" class="filled-in" {% if request.GET.cont_check == '1'%}checked{% endif %}/>
-                                        <span>Продовження реєстрації</span>
-                                    </label>
-
-                                </div>
-                                <div class="col s4 input-field">
-                                    <input type="date" id="cont_start" name="cont_start"
-                                           value="{% if request.GET.cont_start %}{{ request.GET.cont_start }}{% else %}1900-01-01{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="cont_start">Від</label>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="cont_end" name="cont_end"
-                                           value="{% if request.GET.cont_end %}{{ request.GET.cont_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
-                                           min="1900-01-01" >
-                                    <label for="cont_end">До</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-
-                                    <label>
-                                        <input type="checkbox" name="cont_per_check" value="1" class="filled-in" {% if request.GET.cont_per_check == '1'%}checked{% endif %}/>
-                                        <span>Термін продовження</span>
-                                    </label>
-
-                                </div>
-                                <div class="col s4 input-field">
-                                    <input type="date" id="cont_per_start" name="cont_per_start"
-                                           value="{% if request.GET.cont_per_start %}{{ request.GET.cont_per_start }}{% else %}1900-01-01{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="cont_per_start">Від</label>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="cont_per_end" name="cont_per_end"
-                                           value="{% if request.GET.cont_per_end %}{{ request.GET.cont_per_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
-                                           min="1900-01-01" >
-                                    <label for="cont_per_end">До</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-                                    <p>
+                                    </div>
+                                    <div class="col s4">
                                         <label>
-                                            <input type="checkbox" name="de_reg_check" value="1" class="filled-in" {% if request.GET.de_reg_check == '1'%}checked{% endif %}/>
-                                            <span>Дата зняття з реєс.</span>
+                                            <input class="with-gap" name="registered" value="0" type="radio" {% if request.GET.registered == '0' or request.GET.registered is None %}checked{% endif %}/>
+                                            <span>приписані</span>
                                         </label>
-                                    </p>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="de_reg_start" name="de_reg_start"
-                                           value="{% if request.GET.de_reg_start %}{{ request.GET.de_reg_start }}{% else %}1900-01-01{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="de_reg_start">Від</label>
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="de_reg_end" name="de_reg_end"
-                                           value="{% if request.GET.de_reg_end %}{{ request.GET.de_reg_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="de_reg_end">До</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-                                    <p>
+                                    </div>
+                                    <div class="col s4">
                                         <label>
-                                            <input type="checkbox" name="age_one_check" value="1" class="filled-in" {% if request.GET.age_one_check == '1'%}checked{% endif %}/>
-                                            <span>Років (на дату)</span>
+                                            <input class="with-gap" name="registered" value="1" type="radio" {% if request.GET.registered == '1' %}checked{% endif %}/>
+                                            <span>виписані</span>
                                         </label>
-                                    </p>
+                                    </div>
+
+                                    </div>
+                                    <hr>
                                 </div>
-                                <div class="col s4">
-                                    <label for="age">Вік</label>
-                                    <input style="margin-top: -7px" id="age" value="{% if request.GET.age %}{{ request.GET.age }}{% else %}18{% endif %}" name="age" type="number" min="1" step="1" max="120">
-                                </div>
-                                <div class="col s4 input-field ">
-                                    <input type="date" id="age_on" name="age_on"
-                                           value="{% if request.GET.age_on %}{{ request.GET.age_on }}{% else %}{% now "Y-m-d" %}{% endif %}"
-                                           min="1900-01-01" max="{% now "Y-m-d" %}">
-                                    <label for="age_on">На</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s6">
-                            <div class="row no-margin-bottom">
-                                <div class="col s4">
-                                    <label>Паспортист</label>
-                                    <select class="browser-default" name="pasportyst">
-                                        <option value="-1" selected>всі</option>
-                                        {% for pas in pasportysts %}
-                                            <option {% if request.GET.pasportyst == pas.id|slugify %}selected{% endif %} value="{{ pas.id }}">{{ pas }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        <input id="note" type="text" name="note" value="{{ request.GET.note }}">
-                                        <label for="note">Примітка</label>
+                            <div class="col s4">
+                                <div class="row no-margin-bottom">
+                                    <div class="col s4">
+                                        <label>
+                                            <input type="checkbox" name="reg_check" value="1" class="filled-in" {% if request.GET.reg_check == '1'%}checked{% endif %}/>
+                                            <span>Дата реєстрації</span>
+                                        </label>
+                                    </div>
+                                    <div class="col s8">
+                                        <div class="row no-margin-bottom">
+                                            <div class="col s6 input-field">
+                                                <input type="date" id="reg_start" name="reg_start"
+                                                       value="{% if request.GET.reg_start %}{{ request.GET.reg_start }}{% else %}1900-01-01{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="reg_start">Від</label>
+                                            </div>
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="reg_end" name="reg_end"
+                                                       value="{% if request.GET.reg_end %}{{ request.GET.reg_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="reg_end">До</label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col s4">
-                                    <p>
+                            </div>
+                            <div class="col s4">
+                                <div class="row no-margin-bottom">
+                                    <div class="col s4">
                                         <label>
-                                            <input type="checkbox" name="expired" value="1" class="filled-in" {% if request.GET.expired == '1'%}checked{% endif %}/>
-                                            <span>Протерміновані</span>
+                                            <input type="checkbox" name="reg_per_check" value="1" class="filled-in" {% if request.GET.reg_per_check == '1'%}checked{% endif %}/>
+                                            <span>Термін реєстрації</span>
                                         </label>
-                                    </p>
+                                    </div>
+                                    <div class="col s8">
+                                        <div class="row no-margin-bottom">
+                                            <div class="col s6 input-field">
+                                                <input type="date" id="reg_per_start" name="reg_per_start"
+                                                       value="{% if request.GET.reg_per_start %}{{ request.GET.reg_per_start }}{% else %}1900-01-01{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="reg_per_start">Від</label>
+                                            </div>
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="reg_per_end" name="reg_per_end"
+                                                       value="{% if request.GET.reg_per_end %}{{ request.GET.reg_per_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                                       min="1900-01-01" >
+                                                <label for="reg_per_end">До</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="row no-margin-bottom">
+                                    <div class="col s4">
+                                        <label>
+                                            <input type="checkbox" name="cont_check" value="1" class="filled-in" {% if request.GET.cont_check == '1'%}checked{% endif %}/>
+                                            <span>Продовження реєстрації</span>
+                                        </label>
+                                    </div>
+                                    <div class="col s8">
+                                        <div class="row no-margin-bottom">
+                                            <div class="col s6 input-field">
+                                                <input type="date" id="cont_start" name="cont_start"
+                                                       value="{% if request.GET.cont_start %}{{ request.GET.cont_start }}{% else %}1900-01-01{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="cont_start">Від</label>
+                                            </div>
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="cont_end" name="cont_end"
+                                                       value="{% if request.GET.cont_end %}{{ request.GET.cont_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                                       min="1900-01-01" >
+                                                <label for="cont_end">До</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="row no-margin-bottom">
+                                    <div class="col s4">
+                                        <label>
+                                            <input type="checkbox" name="cont_per_check" value="1" class="filled-in" {% if request.GET.cont_per_check == '1'%}checked{% endif %}/>
+                                            <span>Термін продовження</span>
+                                        </label>
+                                    </div>
+                                    <div class="col s8">
+                                        <div class="row no-margin-bottom">
+                                            <div class="col s6 input-field">
+                                                <input type="date" id="cont_per_start" name="cont_per_start"
+                                                       value="{% if request.GET.cont_per_start %}{{ request.GET.cont_per_start }}{% else %}1900-01-01{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="cont_per_start">Від</label>
+                                            </div>
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="cont_per_end" name="cont_per_end"
+                                                       value="{% if request.GET.cont_per_end %}{{ request.GET.cont_per_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                                       min="1900-01-01" >
+                                                <label for="cont_per_end">До</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="row no-margin-bottom">
+                                    <div class="col s4">
+                                        <p>
+                                            <label>
+                                                <input type="checkbox" name="de_reg_check" value="1" class="filled-in" {% if request.GET.de_reg_check == '1'%}checked{% endif %}/>
+                                                <span>Дата зняття з реєс.</span>
+                                            </label>
+                                        </p>
+                                    </div>
+                                    <div class="col s8">
+                                        <div class="row no-margin-bottom">
+                                            <div class="col s6 input-field ">
+                                            <input type="date" id="de_reg_start" name="de_reg_start"
+                                                   value="{% if request.GET.de_reg_start %}{{ request.GET.de_reg_start }}{% else %}1900-01-01{% endif %}"
+                                                   min="1900-01-01" max="{% now "Y-m-d" %}">
+                                            <label for="de_reg_start">Від</label>
+                                            </div>
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="de_reg_end" name="de_reg_end"
+                                                       value="{% if request.GET.de_reg_end %}{{ request.GET.de_reg_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="de_reg_end">До</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="row no-margin-bottom">
+                                    <div class="col s4">
+                                        <p>
+                                            <label>
+                                                <input type="checkbox" class="filled-in" name="birth_check" value="1" {% if request.GET.birth_check == '1'%}checked{% endif %}/>
+                                                <span>Дата народження</span>
+                                            </label>
+                                        </p>
+                                    </div>
+                                    <div class="col s8">
+                                        <div class="row no-margin-bottom">
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="birthday_start" name="birthday_start"
+                                                       value="{% if request.GET.birthday_start %}{{ request.GET.birthday_start }}{% else %}1900-01-01{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="birthday_start">Від</label>
+                                            </div>
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="birthday_end" name="birthday_end"
+                                                       value="{% if request.GET.birthday_end %}{{ request.GET.birthday_end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="birthday_end">До</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="row no-margin-bottom">
+                                    <div class="col s4">
+                                        <p>
+                                            <label>
+                                                <input type="checkbox" name="age_one_check" value="1" class="filled-in" {% if request.GET.age_one_check == '1'%}checked{% endif %}/>
+                                                <span>Років (на дату)</span>
+                                            </label>
+                                        </p>
+                                    </div>
+                                    <div class="col s8">
+                                        <div class="row">
+                                            <div class="col s6 input-field">
+                                                <label for="age">Вік</label>
+                                                <input id="age" value="{% if request.GET.age %}{{ request.GET.age }}{% else %}18{% endif %}" name="age" type="number" min="1" step="1" max="120">
+                                            </div>
+                                            <div class="col s6 input-field ">
+                                                <input type="date" id="age_on" name="age_on"
+                                                       value="{% if request.GET.age_on %}{{ request.GET.age_on }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                                                       min="1900-01-01" max="{% now "Y-m-d" %}">
+                                                <label for="age_on">На</label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
+                    <!-- filters end -->
 
                 </div>
 
-
                 <input type="hidden" name="page" id="page-hidden-input">
             </form>
-        </div>
+        </div> <!-- This is a comment -->
     </div>
 {% endblock %}
 
@@ -465,16 +533,27 @@
                  });
              }
              
-             function listeGo2Page() {
+             function listenGo2Page() {
                  $('#page-form').submit(function (event) {
                     event.preventDefault();
-
                     var page = $('#id_page_visible').val();
                     $('#page-hidden-input').val(page);
 
                     var form = $('#search-form');
                     form.submit();
 
+                    $('#search-btn-col').hide();
+                    $('#preloader-col').show();
+
+                });
+             }
+
+             function listenFilterSubmit() {
+                 $('#search-form').submit(function (event) {
+                    event.preventDefault();
+                    $('#search-btn-col').hide();
+                    $('#preloader-col').show();
+                    this.submit();
                 });
              }
 
@@ -506,7 +585,8 @@
                 listenForPersonClick();
 
                 listenForHostelChange();
-                listeGo2Page();
+                listenGo2Page();
+                listenFilterSubmit();
 
                 initDTable();
              }

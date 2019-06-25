@@ -78,7 +78,7 @@ class Hostel(models.Model):
     address = models.CharField(max_length=256)
 
     def __str__(self):
-        return "Гуртожиток №" + self.number
+        return "№" + self.number
 
 
 class Pasportyst(models.Model):
